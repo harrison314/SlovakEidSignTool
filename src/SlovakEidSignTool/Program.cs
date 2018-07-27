@@ -25,7 +25,7 @@ namespace SlovakEidSignTool
             Console.WriteLine("Certificates:");
             Console.WriteLine();
 
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, new ConsolePinprovider()))
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, new ConsolePinProvider()))
             {
                 foreach (X509Certificate2 certificate in cardDeviceController.ListCertificates())
                 {
@@ -43,7 +43,7 @@ namespace SlovakEidSignTool
         {
             string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
             Console.WriteLine("Load: {0}", eidLib);
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, new ConsolePinprovider()))
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, new ConsolePinProvider()))
             {
                 CardSignedCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
                 Console.WriteLine("Sign certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);

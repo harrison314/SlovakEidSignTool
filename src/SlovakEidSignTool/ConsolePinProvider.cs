@@ -5,9 +5,9 @@ using System.Text;
 
 namespace SlovakEidSignTool
 {
-    public class ConsolePinprovider : IPinProvider
+    public class ConsolePinProvider : IPinProvider
     {
-        public ConsolePinprovider()
+        public ConsolePinProvider()
         {
 
         }
