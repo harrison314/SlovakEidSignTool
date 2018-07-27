@@ -10,7 +10,6 @@ namespace SlovakEidSignTool
     {
         public static int Main(string[] args)
         {
-
             return Parser.Default.ParseArguments<ListCertOptions, SignPdfOptions>(args)
                .MapResult(
                     (ListCertOptions opts) => ListCertificates(opts),
@@ -46,7 +45,7 @@ namespace SlovakEidSignTool
             using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, new ConsolePinProvider()))
             {
                 CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
-                Console.WriteLine("Sign certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
+                Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
 
                 Pkcs11ExternalSignature pkcs11ExternalSignature = new Pkcs11ExternalSignature(signedCertificate);
 
@@ -55,7 +54,7 @@ namespace SlovakEidSignTool
                     opts.SourcePdf,
                     opts.DestinationPdf);
 
-                Console.WriteLine("{0} signed and saved to {1}", System.IO.Path.GetFileName(opts.SourcePdf), opts.DestinationPdf);
+                Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourcePdf), opts.DestinationPdf);
             }
 
             return 0;
@@ -92,7 +91,7 @@ namespace SlovakEidSignTool
                 }
             }
 
-            throw new Exception("Not found PKCS#11 library.");
+            throw new IOException("Not found PKCS#11 library.");
         }
     }
 }

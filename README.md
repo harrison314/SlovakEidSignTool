@@ -8,7 +8,8 @@ _SlovakEidSignTool_ is example project for signing PDFs using Slovak eID (eID wi
 Used:
 * .Net Core 2.1 - multi-platform,
 * [PKCS#11 Interop](https://pkcs11interop.net/) for communication with eID "driver" (or other hardware token),
-* iTextSharp library.
+* [iTextSharp](https://github.com/itext/itextsharp) library.
+* [commandline](https://github.com/commandlineparser/commandline) for parsing command line arguments.
 
 ## Prerequisites
  * .Net Core SDK for build,
