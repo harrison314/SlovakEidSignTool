@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace SlovakEidSignTool
 {
-    public class CardSignedCertificate
+    public class CardSigningCertificate
     {
         private readonly Slot slot;
         private readonly ObjectHandle privateKeyHandle;
@@ -27,7 +27,7 @@ namespace SlovakEidSignTool
             get => new X509Certificate2(this.RawCertificate);
         }
 
-        public CardSignedCertificate(Slot slot, byte[] ckaValue, ObjectHandle privateKeyHandle, IPinProvider pinProvider)
+        public CardSigningCertificate(Slot slot, byte[] ckaValue, ObjectHandle privateKeyHandle, IPinProvider pinProvider)
         {
             this.slot = slot ?? throw new ArgumentNullException(nameof(slot));
             this.RawCertificate = ckaValue ?? throw new ArgumentNullException(nameof(ckaValue));

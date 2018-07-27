@@ -45,7 +45,7 @@ namespace SlovakEidSignTool
             Console.WriteLine("Load: {0}", eidLib);
             using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, new ConsolePinProvider()))
             {
-                CardSignedCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
+                CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
                 Console.WriteLine("Sign certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
 
                 Pkcs11ExternalSignature pkcs11ExternalSignature = new Pkcs11ExternalSignature(signedCertificate);

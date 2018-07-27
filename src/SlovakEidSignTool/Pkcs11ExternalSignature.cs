@@ -12,9 +12,9 @@ namespace SlovakEidSignTool
 {
     public class Pkcs11ExternalSignature : IExternalSignature
     {
-        private readonly CardSignedCertificate cardSignedCertificate;
+        private readonly CardSigningCertificate cardSignedCertificate;
 
-        public Pkcs11ExternalSignature(CardSignedCertificate cardSignedCertificate)
+        public Pkcs11ExternalSignature(CardSigningCertificate cardSignedCertificate)
         {
             this.cardSignedCertificate = cardSignedCertificate ?? throw new ArgumentNullException(nameof(cardSignedCertificate));
         }

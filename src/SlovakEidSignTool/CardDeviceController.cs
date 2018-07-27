@@ -61,9 +61,9 @@ namespace SlovakEidSignTool
             return certificates;
         }
 
-        public IReadOnlyList<CardSignedCertificate> GetSignedCertificates()
+        public IReadOnlyList<CardSigningCertificate> GetSignedCertificates()
         {
-            List<CardSignedCertificate> result = new List<CardSignedCertificate>();
+            List<CardSigningCertificate> result = new List<CardSigningCertificate>();
 
             using (Session session = this.slot.OpenSession(SessionType.ReadOnly))
             {
@@ -81,7 +81,7 @@ namespace SlovakEidSignTool
                         List<ObjectAttribute> privateKeyAttr = session.GetAttributeValue(privateKeyhandle, new List<CKA>() { CKA.CKA_ALWAYS_AUTHENTICATE });
                         bool isAwaisAuth = privateKeyAttr[0].GetValueAsBool();
 
-                        result.Add(new CardSignedCertificate(this.slot, ckaValue, privateKeyhandle, isAwaisAuth ? this.pinProvider : null));
+                        result.Add(new CardSigningCertificate(this.slot, ckaValue, privateKeyhandle, isAwaisAuth ? this.pinProvider : null));
                     }
                 }
             }
