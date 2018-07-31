@@ -1,5 +1,7 @@
 ﻿using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
+using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Asn1.X509;
 using SlovakEidSignTool.LowLevelExtensions;
 using System;
 using System.Collections.Generic;
@@ -40,9 +42,8 @@ namespace SlovakEidSignTool
             if (hash == null) throw new ArgumentNullException(nameof(hash));
             if (hash.Length != 32) throw new ArgumentOutOfRangeException($"SHA-256 hash has 32 bits");
 
-            // PKCS 1 Digest info for SHA-256
-            byte[] pkcs1DigestInfo = new byte[] { 0x30, 0x31, 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            Array.Copy(hash, 0, pkcs1DigestInfo, pkcs1DigestInfo.Length - hash.Length, hash.Length);
+            // PKCS 1 Digest info for SHA-256, 2.16.840.1.101.3.4.2.1 is oid for SHA-256
+            byte[] pkcs1DigestInfo = this.CreateDigestInfo(hash, "2.16.840.1.101.3.4.2.1");
 
             using (Session session = this.slot.OpenSession(SessionType.ReadOnly))
             {
@@ -63,6 +64,14 @@ namespace SlovakEidSignTool
                     }
                 }
             }
+        }
+
+        private byte[] CreateDigestInfo(byte[] hash, string hashOid)
+        {
+            DerObjectIdentifier derObjectIdentifier = new DerObjectIdentifier(hashOid);
+            AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(derObjectIdentifier, null);
+            DigestInfo digestInfo = new DigestInfo(algorithmIdentifier, hash);
+            return digestInfo.GetDerEncoded();
         }
     }
 }
