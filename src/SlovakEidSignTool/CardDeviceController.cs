@@ -19,7 +19,7 @@ namespace SlovakEidSignTool
 
         private bool disposedValue = false;
 
-        public CardDeviceController(string pkcs11Libpath, IPinProvider pinProvider)
+        public CardDeviceController(string pkcs11Libpath, IPinProvider pinProvider, string zepLabel = "SIG_ZEP")
         {
             if (pkcs11Libpath == null) throw new ArgumentNullException(nameof(pkcs11Libpath));
             if (pinProvider == null) throw new ArgumentNullException(nameof(pinProvider));
@@ -30,7 +30,7 @@ namespace SlovakEidSignTool
             try
             {
                 List<Slot> slots = this.pkcs11.GetSlotList(SlotsType.WithTokenPresent);
-                this.slot = slots.First();
+                this.slot = slots.SingleOrDefault(t => string.IsNullOrEmpty(zepLabel) || string.Equals(t.GetTokenInfo().Label, zepLabel, StringComparison.Ordinal));
                 this.loginSession = this.slot.OpenSession(SessionType.ReadOnly);
 
                 if (!this.SessionIsAuthenticated(this.loginSession))
