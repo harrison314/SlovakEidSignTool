@@ -31,6 +31,12 @@ namespace SlovakEidSignTool
             {
                 List<Slot> slots = this.pkcs11.GetSlotList(SlotsType.WithTokenPresent);
                 this.slot = slots.SingleOrDefault(t => string.IsNullOrEmpty(zepLabel) || string.Equals(t.GetTokenInfo().Label, zepLabel, StringComparison.Ordinal));
+                if (this.slot == null)
+                {
+                    this.pkcs11.Dispose();
+                    throw new ArgumentException($"PKCS#11 lib '{pkcs11Libpath}' can not contains slot with label '{zepLabel}'.");
+                }
+
                 this.loginSession = this.slot.OpenSession(SessionType.ReadOnly);
 
                 if (!this.SessionIsAuthenticated(this.loginSession))
