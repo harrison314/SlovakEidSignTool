@@ -33,7 +33,7 @@ namespace SlovakEidSignTool
             try
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.Write("ZEP pin: ");
+                Console.Write("KEP pin: ");
                 string line = ReadPassword('*').Trim();
 
                 return Encoding.UTF8.GetBytes(line);

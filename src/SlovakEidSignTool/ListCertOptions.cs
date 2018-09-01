@@ -14,6 +14,13 @@ namespace SlovakEidSignTool
             set;
         }
 
+        [Option('e', "useEidClient", Default = null, HelpText = "Use eID client to set PINs.")]
+        public bool UseEidClientPin
+        {
+            get;
+            set;
+        }
+
         public ListCertOptions()
         {
 

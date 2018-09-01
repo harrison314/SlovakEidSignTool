@@ -24,7 +24,7 @@ namespace SlovakEidSignTool
             Console.WriteLine("Certificates:");
             Console.WriteLine();
 
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, new ConsolePinProvider()))
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin)))
             {
                 foreach (X509Certificate2 certificate in cardDeviceController.ListCertificates())
                 {
@@ -42,7 +42,7 @@ namespace SlovakEidSignTool
         {
             string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
             Console.WriteLine("Load: {0}", eidLib);
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, new ConsolePinProvider()))
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin)))
             {
                 CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
                 Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
@@ -92,6 +92,18 @@ namespace SlovakEidSignTool
             }
 
             throw new IOException("Not found PKCS#11 library.");
+        }
+
+        private static IPinProvider CreatePinprovider(bool useEidClient)
+        {
+            if(useEidClient)
+            {
+                return new EidPinProvider();
+            }
+            else
+            {
+                return new ConsolePinProvider();
+            }
         }
     }
 }

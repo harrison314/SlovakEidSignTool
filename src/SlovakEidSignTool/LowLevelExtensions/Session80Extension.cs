@@ -22,7 +22,7 @@ namespace SlovakEidSignTool.LowLevelExtensions
                 throw new Pkcs11Exception("C_SignInit", rv);
             }
 
-            rv = _p11.C_Login(session.SessionId, CKU.CKU_CONTEXT_SPECIFIC, pin, Convert.ToUInt64(pin.Length));
+            rv = _p11.C_Login(session.SessionId, CKU.CKU_CONTEXT_SPECIFIC, pin, pin != null ? Convert.ToUInt64(pin.Length) : 0UL);
             if (rv != CKR.CKR_OK)
             {
                 throw new Pkcs11Exception("C_Login", rv);
