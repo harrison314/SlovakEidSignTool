@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using SlovakEidSignTool.Pdf;
 using System;
 using System.IO;
 using System.Linq;

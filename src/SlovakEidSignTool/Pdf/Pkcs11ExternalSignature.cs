@@ -8,7 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SlovakEidSignTool
+namespace SlovakEidSignTool.Pdf
 {
     public class Pkcs11ExternalSignature : IExternalSignature
     {
