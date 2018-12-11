@@ -47,7 +47,7 @@ namespace SlovakEidSignTool
             {
                 yield return new Example("Sign PDF", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationPdf = "helloWorld_signed.pdf", UseEidClientPin = false });
                 yield return new Example("Sign PDF with eID client for PIN typing", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationPdf = "helloWorld_signed.pdf", UseEidClientPin = true });
-                yield return new Example("List certificates with specific PKCS11 lib", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationPdf = "helloWorld_signed.pdf", LibPath = "/opt/SkEid/bin/pkcs11_x64.so", UseEidClientPin = false });
+                yield return new Example("Sign PDF with specific PKCS11 lib", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationPdf = "helloWorld_signed.pdf", LibPath = "/opt/SkEid/bin/pkcs11_x64.so", UseEidClientPin = false });
             }
         }
     }
