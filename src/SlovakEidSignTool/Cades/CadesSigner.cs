@@ -1,0 +1,113 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Org.BouncyCastle.X509;
+
+namespace SlovakEidSignTool.Cades
+{
+    public class CadesSigner
+    {
+        private const string SignaturePath = "META-INF/signature.p7s";
+        private const string ManifestPath = "META-INF/asicmanifest.xml";
+        private const string ContainerMimeType = "application/vnd.etsi.asic-e+zip";
+
+        private readonly List<(FileInfo, string)> inputFiles;
+
+        public CadesSigner()
+        {
+            this.inputFiles = new List<(FileInfo, string)>();
+        }
+
+        public void AddFile(FileInfo fileInfo, string mimeType)
+        {
+            if (fileInfo == null) throw new ArgumentNullException(nameof(fileInfo));
+            if (mimeType == null) throw new ArgumentNullException(nameof(mimeType));
+            if (!fileInfo.Exists) throw new FileNotFoundException("File not exits.", fileInfo.FullName);
+
+            this.inputFiles.Add((fileInfo, mimeType));
+        }
+
+        public void CreateContainer(ICadesExternalSignature externalSigner, string ouputFilePath)
+        {
+            if (externalSigner == null) throw new ArgumentNullException(nameof(externalSigner));
+            if (ouputFilePath == null) throw new ArgumentNullException(nameof(ouputFilePath));
+
+            AsicManifestBuilder asicManifestBuilder = new AsicManifestBuilder();
+            asicManifestBuilder.AddP7Signature(SignaturePath);
+
+            foreach ((FileInfo file, string mimeType) in this.inputFiles)
+            {
+                using (Stream contentStream = file.OpenRead())
+                {
+                    asicManifestBuilder.AddFile(file.Name, mimeType, contentStream);
+                }
+            }
+
+            byte[] manifestData = asicManifestBuilder.ToByteArray();
+
+            Pkcs7DetachedSignatureGenerator p7Generator = new Pkcs7DetachedSignatureGenerator(externalSigner);
+
+            Org.BouncyCastle.X509.X509CertificateParser x509CertificateParser = new Org.BouncyCastle.X509.X509CertificateParser();
+            Org.BouncyCastle.X509.X509Certificate signingCertificate = x509CertificateParser.ReadCertificate(externalSigner.GetCertificate());
+
+            byte[] signature = p7Generator.GenerateP7s(manifestData, signingCertificate, this.BuildCertificatePath(signingCertificate));
+
+            using (ZipArchive archive = ZipFile.Open(ouputFilePath, ZipArchiveMode.Create))
+            {
+                this.AddFileToArchive(archive, "mimetype", ContainerMimeType);
+                this.AddFileToArchive(archive, ManifestPath, manifestData);
+                this.AddFileToArchive(archive, SignaturePath, signature);
+
+                foreach ((FileInfo file, _) in this.inputFiles)
+                {
+                    this.AddFileToArchive(archive, file.Name, file);
+                }
+            }
+        }
+
+        private void AddFileToArchive(ZipArchive archive, string name, string content)
+        {
+            ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(name);
+            byte[] contentData = Encoding.UTF8.GetBytes(content);
+
+            using (Stream stream = zipArchiveEntry.Open())
+            {
+                stream.Write(contentData, 0, contentData.Length);
+            }
+        }
+
+        private void AddFileToArchive(ZipArchive archive, string name, byte[] content)
+        {
+            ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(name);
+
+            using (Stream stream = zipArchiveEntry.Open())
+            {
+                stream.Write(content, 0, content.Length);
+            }
+        }
+
+        private void AddFileToArchive(ZipArchive archive, string name, FileInfo contentFile)
+        {
+            ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(name);
+
+            using (Stream fileStream = contentFile.OpenRead())
+            {
+                using (Stream stream = zipArchiveEntry.Open())
+                {
+                    fileStream.CopyTo(stream);
+                }
+            }
+        }
+
+        private IEnumerable<X509Certificate> BuildCertificatePath(X509Certificate signingCertificate)
+        {
+            //TODO: implement using https://github.com/jariq/Pkcs7SignatureGenerator/blob/master/src/Pkcs7SignatureGenerator/CertUtils.cs
+
+            return Array.Empty<X509Certificate>();
+        }
+    }
+}

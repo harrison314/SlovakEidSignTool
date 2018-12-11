@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using SlovakEidSignTool.Cades;
 using SlovakEidSignTool.Pdf;
 using System;
 using System.IO;
@@ -11,10 +12,11 @@ namespace SlovakEidSignTool
     {
         public static int Main(string[] args)
         {
-            return Parser.Default.ParseArguments<ListCertOptions, SignPdfOptions>(args)
+            return Parser.Default.ParseArguments<ListCertOptions, SignPdfOptions, SignCadesOptions>(args)
                .MapResult(
                     (ListCertOptions opts) => ListCertificates(opts),
                     (SignPdfOptions opts) => SignPdf(opts),
+                    (SignCadesOptions opts) => SignCades(opts),
                     _ => 1);
         }
 
@@ -58,6 +60,27 @@ namespace SlovakEidSignTool
                 Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourcePdf), opts.DestinationPdf);
             }
 
+            return 0;
+        }
+
+        private static int SignCades(SignCadesOptions opts)
+        {
+            string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
+            Console.WriteLine("Load: {0}", eidLib);
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin)))
+            {
+                CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
+                Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
+
+                ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
+                CadesSigner signer = new CadesSigner();
+
+                signer.AddFile(new FileInfo(opts.SourceFile), opts.SourceFileMimeType);
+
+                signer.CreateContainer(externalSignature, opts.DestinationFile);
+
+                Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourceFile), opts.DestinationFile);
+            }
             return 0;
         }
 
