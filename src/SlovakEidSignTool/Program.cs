@@ -81,6 +81,7 @@ namespace SlovakEidSignTool
 
                 Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourceFile), opts.DestinationFile);
             }
+
             return 0;
         }
 
@@ -108,7 +109,7 @@ namespace SlovakEidSignTool
                         return potentialPath;
                     }
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     // Ignore exception
                     System.Diagnostics.Trace.WriteLine(ex.ToString());
@@ -120,7 +121,7 @@ namespace SlovakEidSignTool
 
         private static IPinProvider CreatePinprovider(bool useEidClient)
         {
-            if(useEidClient)
+            if (useEidClient)
             {
                 return new EidPinProvider();
             }

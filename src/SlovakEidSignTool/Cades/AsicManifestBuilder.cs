@@ -17,11 +17,13 @@ namespace SlovakEidSignTool.Cades
 
         public AsicManifestBuilder()
         {
-            this.document = new XDocument(new XDeclaration("1.0", "UTF-8", "yes"));
+            this.document = new XDocument(new XDeclaration("1.0", "UTF-8", null));
             this.document.Add(new XElement(this.asic + "ASiCManifest",
                 new XAttribute(XNamespace.Xmlns + "asic", this.asic.NamespaceName),
                 new XAttribute(XNamespace.Xmlns + "dsig", this.dsig.NamespaceName)
                 ));
+
+            this.document.Root.Add(new XComment("Created using SlovakEidSignTool - https://github.com/harrison314/SlovakEidSignTool"));
         }
 
         public void AddP7Signature(string path)
@@ -31,7 +33,7 @@ namespace SlovakEidSignTool.Cades
             this.document.Root.Add(new XElement(
                 this.asic + "SigReference",
                 new XAttribute("URI", path),
-                new XAttribute("MimeType", "application/x-pkcs7-signature")
+                new XAttribute("MimeType", "application/pkcs7-signature")
                 ));
         }
 

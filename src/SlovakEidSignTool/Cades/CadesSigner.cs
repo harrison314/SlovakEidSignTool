@@ -11,9 +11,10 @@ namespace SlovakEidSignTool.Cades
 {
     public class CadesSigner
     {
-        private const string SignaturePath = "META-INF/signature.p7s";
-        private const string ManifestPath = "META-INF/asicmanifest.xml";
+        private const string SignaturePath = "META-INF/signatureSkEid.p7s";
+        private const string ManifestPath = "META-INF/ASiCManifestSkEid.xml";
         private const string ContainerMimeType = "application/vnd.etsi.asic-e+zip";
+        private const string ContainerMimeTypePath = "mimetype";
 
         private readonly List<(FileInfo, string)> inputFiles;
 
@@ -24,17 +25,35 @@ namespace SlovakEidSignTool.Cades
 
         public void AddFile(FileInfo fileInfo, string mimeType)
         {
-            if (fileInfo == null) throw new ArgumentNullException(nameof(fileInfo));
-            if (mimeType == null) throw new ArgumentNullException(nameof(mimeType));
-            if (!fileInfo.Exists) throw new FileNotFoundException("File not exits.", fileInfo.FullName);
+            if (fileInfo == null)
+            {
+                throw new ArgumentNullException(nameof(fileInfo));
+            }
+
+            if (mimeType == null)
+            {
+                throw new ArgumentNullException(nameof(mimeType));
+            }
+
+            if (!fileInfo.Exists)
+            {
+                throw new FileNotFoundException("File not exits.", fileInfo.FullName);
+            }
 
             this.inputFiles.Add((fileInfo, mimeType));
         }
 
         public void CreateContainer(ICadesExternalSignature externalSigner, string ouputFilePath)
         {
-            if (externalSigner == null) throw new ArgumentNullException(nameof(externalSigner));
-            if (ouputFilePath == null) throw new ArgumentNullException(nameof(ouputFilePath));
+            if (externalSigner == null)
+            {
+                throw new ArgumentNullException(nameof(externalSigner));
+            }
+
+            if (ouputFilePath == null)
+            {
+                throw new ArgumentNullException(nameof(ouputFilePath));
+            }
 
             AsicManifestBuilder asicManifestBuilder = new AsicManifestBuilder();
             asicManifestBuilder.AddP7Signature(SignaturePath);
@@ -51,14 +70,14 @@ namespace SlovakEidSignTool.Cades
 
             Pkcs7DetachedSignatureGenerator p7Generator = new Pkcs7DetachedSignatureGenerator(externalSigner);
 
-            Org.BouncyCastle.X509.X509CertificateParser x509CertificateParser = new Org.BouncyCastle.X509.X509CertificateParser();
-            Org.BouncyCastle.X509.X509Certificate signingCertificate = x509CertificateParser.ReadCertificate(externalSigner.GetCertificate());
+            X509CertificateParser x509CertificateParser = new X509CertificateParser();
+            X509Certificate signingCertificate = x509CertificateParser.ReadCertificate(externalSigner.GetCertificate());
 
             byte[] signature = p7Generator.GenerateP7s(manifestData, signingCertificate, this.BuildCertificatePath(signingCertificate));
 
             using (ZipArchive archive = ZipFile.Open(ouputFilePath, ZipArchiveMode.Create))
             {
-                this.AddFileToArchive(archive, "mimetype", ContainerMimeType);
+                this.AddFileToArchive(archive, ContainerMimeTypePath, ContainerMimeType);
                 this.AddFileToArchive(archive, ManifestPath, manifestData);
                 this.AddFileToArchive(archive, SignaturePath, signature);
 
@@ -105,9 +124,12 @@ namespace SlovakEidSignTool.Cades
 
         private IEnumerable<X509Certificate> BuildCertificatePath(X509Certificate signingCertificate)
         {
-            //TODO: implement using https://github.com/jariq/Pkcs7SignatureGenerator/blob/master/src/Pkcs7SignatureGenerator/CertUtils.cs
+            //TODO: refactor
 
-            return Array.Empty<X509Certificate>();
+            X509CertificateParser x509CertificateParser = new X509CertificateParser();
+
+            return CertificateUtils.BuldChain(signingCertificate.GetEncoded())
+                 .Select(t => x509CertificateParser.ReadCertificate(t));
         }
     }
 }

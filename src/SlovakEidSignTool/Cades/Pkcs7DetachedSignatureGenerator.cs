@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.Cms;
+using Org.BouncyCastle.Asn1.Ess;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.X509;
 
@@ -16,15 +17,29 @@ namespace SlovakEidSignTool.Cades
 
         public Pkcs7DetachedSignatureGenerator(ICadesExternalSignature cadesExternalSignature)
         {
-            this.cadesExternalSignature = cadesExternalSignature;
+            this.cadesExternalSignature = cadesExternalSignature ?? throw new ArgumentNullException(nameof(cadesExternalSignature));
         }
 
         public byte[] GenerateP7s(byte[] data, X509Certificate signingCertificate, IEnumerable<X509Certificate> certPath)
         {
-            byte[] dataHashSha256 = this.ComputeHash(data);
-            Asn1EncodableVector signedAttributesVector = this.CreateSignatureAttribute(dataHashSha256);
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
 
-            // Compute digest of SignerInfo.signedAttrs
+            if (signingCertificate == null)
+            {
+                throw new ArgumentNullException(nameof(signingCertificate));
+            }
+
+            if (certPath == null)
+            {
+                throw new ArgumentNullException(nameof(certPath));
+            }
+
+            byte[] dataHashSha256 = this.ComputeHash(data);
+            Asn1EncodableVector signedAttributesVector = this.CreateSignatureAttribute(dataHashSha256, signingCertificate);
+
             DerSet signedAttributes = new DerSet(signedAttributesVector);
             byte[] signedAttributesDigest = this.ComputeHash(signedAttributes.GetDerEncoded());
 
@@ -83,7 +98,7 @@ namespace SlovakEidSignTool.Cades
             return contentInfo.GetDerEncoded();
         }
 
-        private Asn1EncodableVector CreateSignatureAttribute(byte[] dataHashSha256)
+        private Asn1EncodableVector CreateSignatureAttribute(byte[] dataHashSha256, X509Certificate signingCertificate)
         {
             Asn1EncodableVector signedAttributesVector = new Asn1EncodableVector();
             signedAttributesVector.Add(
@@ -102,6 +117,18 @@ namespace SlovakEidSignTool.Cades
                 new Org.BouncyCastle.Asn1.Cms.Attribute(
                     attrType: new DerObjectIdentifier(Oid.PKCS9AtSigningTime),
                     attrValues: new DerSet(new Org.BouncyCastle.Asn1.Cms.Time(new DerUtcTime(DateTime.UtcNow)))));
+
+            // Add SigningCertificateV2
+            byte[] certHash = this.ComputeHash(signingCertificate.GetEncoded());
+            EssCertIDv2 essCert1 = new EssCertIDv2(new AlgorithmIdentifier(Oid.SHA256), certHash);
+            SigningCertificateV2 scv2 = new SigningCertificateV2(new EssCertIDv2[] { essCert1 });
+
+            signedAttributesVector.Add(
+                new Org.BouncyCastle.Asn1.Cms.Attribute(
+                    attrType: new DerObjectIdentifier(Oid.SigningCertificateV2),
+                    attrValues: new DerSet(scv2)));
+
+
             return signedAttributesVector;
         }
 

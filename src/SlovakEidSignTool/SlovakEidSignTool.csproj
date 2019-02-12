@@ -12,4 +12,10 @@
     <PackageReference Include="Pkcs11Interop" Version="4.0.0.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="sga_1x07.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

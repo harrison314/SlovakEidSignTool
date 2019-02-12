@@ -42,5 +42,10 @@ namespace SlovakEidSignTool.Cades
         /// PKCS#7 signed-data content type
         /// </summary>
         public static string PKCS7IdSignedData = "1.2.840.113549.1.7.2";
+
+        /// <summary>
+        /// The id-aa-signingCertificateV2. See IETF RFC 5126.
+        /// </summary>
+        public static string SigningCertificateV2 = "1.2.840.113549.1.9.16.2.47";
     }
 }
