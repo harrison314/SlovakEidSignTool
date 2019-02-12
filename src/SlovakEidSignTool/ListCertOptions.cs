@@ -21,6 +21,13 @@ namespace SlovakEidSignTool
             set;
         }
 
+        [Option('f', "outputFormat", Default = OutputCertFormat.Description, HelpText = "Output certificate format. Allowed: Description, Pem.")]
+        public OutputCertFormat OutputFormat
+        {
+            get;
+            set;
+        }
+
         public ListCertOptions()
         {
 

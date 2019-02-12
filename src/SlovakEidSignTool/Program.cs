@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 
 namespace SlovakEidSignTool
 {
@@ -29,12 +30,32 @@ namespace SlovakEidSignTool
 
             using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin)))
             {
-                foreach (X509Certificate2 certificate in cardDeviceController.ListCertificates())
+                switch (opts.OutputFormat)
                 {
-                    Console.WriteLine("Thumbprint: {0}", certificate.Thumbprint);
-                    Console.WriteLine("Subject: {0}", certificate.Subject);
-                    Console.WriteLine("Issuer: {0}", certificate.Issuer);
-                    Console.WriteLine();
+                    case OutputCertFormat.Description:
+                        foreach (X509Certificate2 certificate in cardDeviceController.ListCertificates())
+                        {
+                            Console.WriteLine("Thumbprint: {0}", certificate.Thumbprint);
+                            Console.WriteLine("Subject: {0}", certificate.Subject);
+                            Console.WriteLine("Issuer: {0}", certificate.Issuer);
+                            Console.WriteLine();
+                        }
+                        break;
+
+                    case OutputCertFormat.Pem:
+                        foreach (X509Certificate2 certificate in cardDeviceController.ListCertificates())
+                        {
+                            StringBuilder certBuilder = new StringBuilder();
+                            certBuilder.AppendLine("-----BEGIN CERTIFICATE-----");
+                            certBuilder.AppendLine(Convert.ToBase64String(certificate.RawData, Base64FormattingOptions.InsertLineBreaks));
+                            certBuilder.AppendLine("-----END CERTIFICATE-----");
+
+                            Console.WriteLine(certBuilder.ToString());
+                        }
+                        break;
+
+                    default:
+                        throw new InvalidProgramException($"Enum value {opts.OutputFormat} is not supported.");
                 }
             }
 
