@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace SlovakEidSignTool
 {
-    [Verb("signCades", HelpText = "Sign file using eID to CAdES ASIC-E container.")]
+    [Verb("signCades", HelpText = "Sign file using eID to CAdES-BASELINE-B ASIC-E container.")]
     public class SignCadesOptions
     {
         [Option('l', "pkcs11Lib", Default = null, HelpText = "Full path to PKCS#11 library.")]
@@ -32,14 +32,14 @@ namespace SlovakEidSignTool
             set;
         }
 
-        [Value(1, MetaName = "mimeType", HelpText = "Source file mime-type.")]
+        [Value(1, MetaName = "mimeType", HelpText = "Source file mime-type. Eg. text/plain, image/png,...")]
         public string SourceFileMimeType
         {
             get;
             set;
         }
 
-        [Value(2, MetaName = "destinationFile", HelpText = "Destination file path for save signed asice file.")]
+        [Value(2, MetaName = "destinationFile", HelpText = "Destination file path for save signed .asice file.")]
         public string DestinationFile
         {
             get;

@@ -28,34 +28,11 @@ namespace SlovakEidSignTool
             Console.WriteLine("Certificates:");
             Console.WriteLine();
 
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin)))
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin), opts.ListEp ? "SIG_EP" : "SIG_ZEP"))
             {
-                switch (opts.OutputFormat)
+                foreach (X509Certificate2 certificate in cardDeviceController.ListCertificates())
                 {
-                    case OutputCertFormat.Description:
-                        foreach (X509Certificate2 certificate in cardDeviceController.ListCertificates())
-                        {
-                            Console.WriteLine("Thumbprint: {0}", certificate.Thumbprint);
-                            Console.WriteLine("Subject: {0}", certificate.Subject);
-                            Console.WriteLine("Issuer: {0}", certificate.Issuer);
-                            Console.WriteLine();
-                        }
-                        break;
-
-                    case OutputCertFormat.Pem:
-                        foreach (X509Certificate2 certificate in cardDeviceController.ListCertificates())
-                        {
-                            StringBuilder certBuilder = new StringBuilder();
-                            certBuilder.AppendLine("-----BEGIN CERTIFICATE-----");
-                            certBuilder.AppendLine(Convert.ToBase64String(certificate.RawData, Base64FormattingOptions.InsertLineBreaks));
-                            certBuilder.AppendLine("-----END CERTIFICATE-----");
-
-                            Console.WriteLine(certBuilder.ToString());
-                        }
-                        break;
-
-                    default:
-                        throw new InvalidProgramException($"Enum value {opts.OutputFormat} is not supported.");
+                    Console.WriteLine(OutputCertFormater.Format(certificate, opts.OutputFormat));
                 }
             }
 

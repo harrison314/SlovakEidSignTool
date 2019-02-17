@@ -28,6 +28,13 @@ namespace SlovakEidSignTool
             set;
         }
 
+        [Option('a', "listEp", Default = false, HelpText = "List ZIP_EP certificates.")]
+        public bool ListEp
+        {
+            get;
+            set;
+        }
+
         public ListCertOptions()
         {
 
