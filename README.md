@@ -1,5 +1,7 @@
 # Slovak eID Sign Tool
-_Slovak eID Sign Tool_ is tool for listing certificates from Slovak eID card or signing PDF documents with CMS signature (_adbe.pkcs7.detached_ not valid _eIDAS PAdES_).
+_Slovak eID Sign Tool_ is tool for listing certificates from Slovak eID card,
+signing PDF documents with CMS signature (_adbe.pkcs7.detached_ not valid _eIDAS PAdES_)
+or signing file (.txt, .pdf, .png,...) to _eIDAS CAdES-BASELINE-B ASiC-E_ container (.asice file).
 
 This project aim to education [PKCS#11 standard](https://www.cryptsoft.com/pkcs11doc/STANDARD/pkcs-11v2-20.pdf) and document signing using _Slovak eID_.
 
@@ -19,14 +21,25 @@ Used:
 
 ## Usage
 
-### List certificates on eID
+### Listing KEP certificates on eID
  1. Insert eID card to card reader.
  1. Run `dotnet SlovakEidSignTool.dll list`.
  1. Type BOK.
 
-### Sign Pdf "Example.pdf"
+### Listing encryption and authentication certificates on eID
+ 1. Insert eID card to card reader.
+ 1. Run `dotnet SlovakEidSignTool.dll list --listEp`.
+ 1. Type BOK.
+
+### Signing the Pdf file "Example.pdf"
  1. Insert eID card to card reader.
  1. Run `dotnet SlovakEidSignTool.dll signPDF Example.pdf SignedPdf.pdf`.
+ 1. Type BOK.
+ 1. Type ZEP PIN.
+
+ ### Signing the file into the CAdES ASiC-E container
+ 1. Insert eID card to card reader.
+ 1. Run `dotnet SlovakEidSignTool.dll signCades example.txt text/plain SignedExample.asice` (signing file, mime-type of signing file, output signature file).
  1. Type BOK.
  1. Type ZEP PIN.
 
@@ -63,3 +76,10 @@ For more see [.NET Core RID Catalog](https://docs.microsoft.com/en-us/dotnet/cor
  1. [Signing a PDF File Using Azure Key Vault](https://rahulpnath.com/blog/signing-a-pdf-file-using-azure-key-vault/)
  1. [Slovensko.sk](https://www.slovensko.sk/sk/na-stiahnutie)
  1. [Program description in Slovak language](http://harrison314.github.io/SkEidSign.html)
+ 1. [Creating an ASiC-E container manually](https://github.com/difi/asic#creating-an-asic-e-container-manually)
+ 
+## Validation services
+ 1. [Slovek national ZEP validator](https://www.slovensko.sk/sk/e-sluzby/sluzba-overenia-zep)
+ 1. [zep.disig.sk - online signer and validator](https://zep.disig.sk/Portal)
+ 1. [DDS validator](https://dss.agid.gov.it/validation)
+
