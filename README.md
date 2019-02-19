@@ -49,6 +49,10 @@ Example on _Windows 7_ x86 with self-contained build:
 
 ![Signed dcument](doc/SignedDocument.png)
 
+Validation result in [zep.disig.sk](https://zep.disig.sk/) of _CAdES_ signature: 
+
+![Validation result in zep.disig.sk](doc/SignedCadesInZepDisigSk.png)
+
 # Build
 
 ```
@@ -79,7 +83,7 @@ For more see [.NET Core RID Catalog](https://docs.microsoft.com/en-us/dotnet/cor
  1. [Creating an ASiC-E container manually](https://github.com/difi/asic#creating-an-asic-e-container-manually)
  
 ## Validation services
- 1. [Slovek national ZEP validator](https://www.slovensko.sk/sk/e-sluzby/sluzba-overenia-zep)
+ 1. [Slovak national ZEP validator](https://www.slovensko.sk/sk/e-sluzby/sluzba-overenia-zep)
  1. [zep.disig.sk - online signer and validator](https://zep.disig.sk/Portal)
  1. [DDS validator](https://dss.agid.gov.it/validation)
 
