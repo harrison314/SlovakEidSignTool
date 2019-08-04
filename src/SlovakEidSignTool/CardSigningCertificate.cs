@@ -58,9 +58,16 @@ namespace SlovakEidSignTool
                 {
                     byte[] pin = this.pinProvider.GetZepPin();
 
-                    using (Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS))
+                    try
                     {
-                        return session.SignWithAuth(mechanism, this.privateKeyHandle, pkcs1DigestInfo, pin);
+                        using (Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS))
+                        {
+                            return session.SignWithAuth(mechanism, this.privateKeyHandle, pkcs1DigestInfo, pin);
+                        }
+                    }
+                    finally
+                    {
+                        SecurityUtils.SafeClearPin(pin);
                     }
                 }
             }

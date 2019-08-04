@@ -42,7 +42,14 @@ namespace SlovakEidSignTool
                 if (!this.SessionIsAuthenticated(this.loginSession))
                 {
                     byte[] pin = pinProvider.GetBokPin();
-                    this.loginSession.Login(CKU.CKU_USER, pin);
+                    try
+                    {
+                        this.loginSession.Login(CKU.CKU_USER, pin);
+                    }
+                    finally
+                    {
+                        SecurityUtils.SafeClearPin(pin);
+                    }
                 }
             }
             catch (Exception)
