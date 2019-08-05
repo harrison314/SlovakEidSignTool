@@ -18,6 +18,7 @@ namespace SlovakEidSignTool
                     (ListCertOptions opts) => ListCertificates(opts),
                     (SignPdfOptions opts) => SignPdf(opts),
                     (SignCadesOptions opts) => SignCades(opts),
+                    (AddSignCadesOptions opts) => AddSignCades(opts),
                     _ => 1);
         }
 
@@ -71,7 +72,7 @@ namespace SlovakEidSignTool
                 Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
 
                 ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
-                CadesSigner signer = new CadesSigner();
+                SimpleCadesSigner signer = new SimpleCadesSigner();
 
                 signer.AddFile(new FileInfo(opts.SourceFile), opts.SourceFileMimeType);
 
@@ -83,6 +84,30 @@ namespace SlovakEidSignTool
             return 0;
         }
 
+        private static int AddSignCades(AddSignCadesOptions opts)
+        {
+            string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
+            Console.WriteLine("Load: {0}", eidLib);
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin)))
+            {
+                CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
+                Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
+
+                ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
+                ExtenCadesSigner signer = new ExtenCadesSigner(opts.ContainerFile);
+
+                if (!string.IsNullOrEmpty(opts.SourceFile))
+                {
+                    signer.AddFile(new FileInfo(opts.SourceFile), opts.SourceFileMimeType);
+                }
+
+                signer.CreateContainer(externalSignature, opts.DestinationFile);
+
+                Console.WriteLine("Add signature to {0} and saved to {1}", Path.GetFileName(opts.ContainerFile), opts.DestinationFile);
+            }
+
+            return 0;
+        }
 
         private static string FindEidLibrary()
         {
