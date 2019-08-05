@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using Net.Pkcs11Interop.Common;
@@ -25,10 +26,10 @@ namespace SlovakEidSignTool.LowLevelExtensions
                     Net.Pkcs11Interop.HighLevelAPI81.Mechanism mechanism81 = (Net.Pkcs11Interop.HighLevelAPI81.Mechanism)typeof(Mechanism)
                         .GetField("_mechanism81", BindingFlags.Instance | BindingFlags.NonPublic)
                         .GetValue(mechanism);
-                    Net.Pkcs11Interop.HighLevelAPI81.ObjectHandle objecthandle81 = (Net.Pkcs11Interop.HighLevelAPI81.ObjectHandle) typeof(ObjectHandle)
+                    Net.Pkcs11Interop.HighLevelAPI81.ObjectHandle objecthandle81 = (Net.Pkcs11Interop.HighLevelAPI81.ObjectHandle)typeof(ObjectHandle)
                         .GetField("_objectHandle81", BindingFlags.Instance | BindingFlags.NonPublic)
                         .GetValue(objectHandle);
-                   return session.HLA81Session.SignWithPin(mechanism81, objecthandle81, data, pin);
+                    return session.HLA81Session.SignWithPin(mechanism81, objecthandle81, data, pin);
 
                 }
                 else
@@ -67,6 +68,37 @@ namespace SlovakEidSignTool.LowLevelExtensions
                         .GetValue(objectHandle);
                     return session.HLA81Session.SignWithPin(mechanism81, objecthandle81, data, pin);
                 }
+            }
+        }
+
+        public static byte[] SignWithAuth(this Session session, Mechanism mechanism, ObjectHandle objectHandle, byte[] data, SecureString securePin)
+        {
+            if (mechanism == null) throw new ArgumentNullException(nameof(mechanism));
+            if (objectHandle == null) throw new ArgumentNullException(nameof(objectHandle));
+            if (data == null) throw new ArgumentNullException(nameof(data));
+
+            if (securePin == null)
+            {
+                return session.SignWithAuth(mechanism, objectHandle, data, pin: null);
+            }
+            else
+            {
+                byte[] signature = null;
+                SecurityUtils.ExecuteUsingSecureUtf8String(securePin, pin => signature = session.SignWithAuth(mechanism, objectHandle, data, pin));
+
+                return signature;
+            }
+        }
+
+        public static void Login(this Session session, CKU userType, SecureString securePin)
+        {
+            if (securePin == null)
+            {
+                session.Login(userType, pin: null as byte[]);
+            }
+            else
+            {
+                SecurityUtils.ExecuteUsingSecureUtf8String(securePin, pin => session.Login(userType, pin));
             }
         }
     }
