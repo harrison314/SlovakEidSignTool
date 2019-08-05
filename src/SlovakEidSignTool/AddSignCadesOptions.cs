@@ -21,6 +21,13 @@ namespace SlovakEidSignTool
             set;
         }
 
+        [Option('m', "mimeType", HelpText = "Source file mime-type. Eg. text/plain, image/png,...", Required = false, Default = null)]
+        public string SourceFileMimeType
+        {
+            get;
+            set;
+        }
+
         [Value(0, MetaName = "asiceFile", HelpText = "ASIC-E container (*.asice) to add sign.")]
         public string ContainerFile
         {
@@ -30,13 +37,6 @@ namespace SlovakEidSignTool
 
         [Value(1, MetaName = "sourceFile", HelpText = "Source file path.", Required = false)]
         public string SourceFile
-        {
-            get;
-            set;
-        }
-
-        [Value(2, MetaName = "mimeType", HelpText = "Source file mime-type. Eg. text/plain, image/png,...", Required = false)]
-        public string SourceFileMimeType
         {
             get;
             set;

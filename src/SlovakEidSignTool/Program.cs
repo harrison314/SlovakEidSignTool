@@ -74,7 +74,8 @@ namespace SlovakEidSignTool
                 ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
                 SimpleCadesSigner signer = new SimpleCadesSigner();
 
-                signer.AddFile(new FileInfo(opts.SourceFile), opts.SourceFileMimeType);
+                string mimeType = string.IsNullOrEmpty(opts.SourceFileMimeType) ? MimeType.GetMimeTypeFromFileName(Path.GetFileName(opts.SourceFile)) : opts.SourceFileMimeType;
+                signer.AddFile(new FileInfo(opts.SourceFile), mimeType);
 
                 signer.CreateContainer(externalSignature, opts.DestinationFile);
 
@@ -98,7 +99,8 @@ namespace SlovakEidSignTool
 
                 if (!string.IsNullOrEmpty(opts.SourceFile))
                 {
-                    signer.AddFile(new FileInfo(opts.SourceFile), opts.SourceFileMimeType);
+                    string mimeType = string.IsNullOrEmpty(opts.SourceFileMimeType) ? MimeType.GetMimeTypeFromFileName(Path.GetFileName(opts.SourceFile)) : opts.SourceFileMimeType;
+                    signer.AddFile(new FileInfo(opts.SourceFile), mimeType);
                 }
 
                 signer.CreateContainer(externalSignature, opts.DestinationFile);
