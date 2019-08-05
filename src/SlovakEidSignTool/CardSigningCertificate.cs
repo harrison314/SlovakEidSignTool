@@ -6,6 +6,7 @@ using SlovakEidSignTool.LowLevelExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -56,8 +57,7 @@ namespace SlovakEidSignTool
                 }
                 else
                 {
-                    byte[] pin = this.pinProvider.GetZepPin();
-
+                    SecureString pin = this.pinProvider.GetZepPin();
                     try
                     {
                         using (Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS))
@@ -67,7 +67,7 @@ namespace SlovakEidSignTool
                     }
                     finally
                     {
-                        SecurityUtils.SafeClearPin(pin);
+                        pin?.Dispose();
                     }
                 }
             }

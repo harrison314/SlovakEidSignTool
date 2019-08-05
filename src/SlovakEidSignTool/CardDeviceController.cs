@@ -5,8 +5,9 @@ using Net.Pkcs11Interop.HighLevelAPI;
 using Net.Pkcs11Interop.Common;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
-using System.Security.Cryptography;
 using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
+using System.Security;
+using SlovakEidSignTool.LowLevelExtensions;
 
 namespace SlovakEidSignTool
 {
@@ -41,14 +42,14 @@ namespace SlovakEidSignTool
 
                 if (!this.SessionIsAuthenticated(this.loginSession))
                 {
-                    byte[] pin = pinProvider.GetBokPin();
+                    SecureString pin = pinProvider.GetBokPin();
                     try
                     {
                         this.loginSession.Login(CKU.CKU_USER, pin);
                     }
                     finally
                     {
-                        SecurityUtils.SafeClearPin(pin);
+                        pin?.Dispose();
                     }
                 }
             }
@@ -117,7 +118,6 @@ namespace SlovakEidSignTool
                     {
                         return true;
                     }
-
                 }
             }
 
@@ -200,7 +200,6 @@ namespace SlovakEidSignTool
                     this.loginSession.Dispose();
                     this.pkcs11.Dispose();
                 }
-
 
                 this.disposedValue = true;
             }
