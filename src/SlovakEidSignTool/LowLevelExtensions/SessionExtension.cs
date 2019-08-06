@@ -77,16 +77,56 @@ namespace SlovakEidSignTool.LowLevelExtensions
             if (objectHandle == null) throw new ArgumentNullException(nameof(objectHandle));
             if (data == null) throw new ArgumentNullException(nameof(data));
 
-            if (securePin == null)
+            if (Platform.UnmanagedLongSize == 4)
             {
-                return session.SignWithAuth(mechanism, objectHandle, data, pin: null);
+                if (Platform.StructPackingSize == 0)
+                {
+                    //81
+                    Net.Pkcs11Interop.HighLevelAPI81.Mechanism mechanism81 = (Net.Pkcs11Interop.HighLevelAPI81.Mechanism)typeof(Mechanism)
+                        .GetField("_mechanism81", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(mechanism);
+                    Net.Pkcs11Interop.HighLevelAPI81.ObjectHandle objecthandle81 = (Net.Pkcs11Interop.HighLevelAPI81.ObjectHandle)typeof(ObjectHandle)
+                        .GetField("_objectHandle81", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(objectHandle);
+                    return session.HLA81Session.SignWithPin(mechanism81, objecthandle81, data, securePin);
+
+                }
+                else
+                {
+                    //41
+                    Net.Pkcs11Interop.HighLevelAPI41.Mechanism mechanism41 = (Net.Pkcs11Interop.HighLevelAPI41.Mechanism)typeof(Mechanism)
+                        .GetField("_mechanism41", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(mechanism);
+                    Net.Pkcs11Interop.HighLevelAPI41.ObjectHandle objecthandle41 = (Net.Pkcs11Interop.HighLevelAPI41.ObjectHandle)typeof(ObjectHandle)
+                        .GetField("_objectHandle41", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(objectHandle);
+                    return session.HLA41Session.SignWithPin(mechanism41, objecthandle41, data, securePin);
+                }
             }
             else
             {
-                byte[] signature = null;
-                SecurityUtils.ExecuteUsingSecureUtf8String(securePin, pin => signature = session.SignWithAuth(mechanism, objectHandle, data, pin));
-
-                return signature;
+                if (Platform.StructPackingSize == 0)
+                {
+                    //80
+                    Net.Pkcs11Interop.HighLevelAPI80.Mechanism mechanism80 = (Net.Pkcs11Interop.HighLevelAPI80.Mechanism)typeof(Mechanism)
+                        .GetField("_mechanism80", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(mechanism);
+                    Net.Pkcs11Interop.HighLevelAPI80.ObjectHandle objecthandle80 = (Net.Pkcs11Interop.HighLevelAPI80.ObjectHandle)typeof(ObjectHandle)
+                        .GetField("_objectHandle80", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(objectHandle);
+                    return session.HLA80Session.SignWithPin(mechanism80, objecthandle80, data, securePin);
+                }
+                else
+                {
+                    //81
+                    Net.Pkcs11Interop.HighLevelAPI81.Mechanism mechanism81 = (Net.Pkcs11Interop.HighLevelAPI81.Mechanism)typeof(Mechanism)
+                        .GetField("_mechanism81", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(mechanism);
+                    Net.Pkcs11Interop.HighLevelAPI81.ObjectHandle objecthandle81 = (Net.Pkcs11Interop.HighLevelAPI81.ObjectHandle)typeof(ObjectHandle)
+                        .GetField("_objectHandle81", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(objectHandle);
+                    return session.HLA81Session.SignWithPin(mechanism81, objecthandle81, data, securePin);
+                }
             }
         }
 
