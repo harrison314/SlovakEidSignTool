@@ -42,7 +42,7 @@ namespace SlovakEidSignTool
             set;
         }
 
-        [Value(2, MetaName = "destinationFile", HelpText = "Destination file path for save signed .asice file.")]
+        [Option('o', "destinationFile", HelpText = "Destination file path for save signed .asice file.", Required = true)]
         public string DestinationFile
         {
             get;
@@ -59,7 +59,8 @@ namespace SlovakEidSignTool
         {
             get
             {
-                yield return new Example("Sign text document", new AddSignCadesOptions() { ContainerFile = "signedDocument.asice", SourceFile = "hello.pdf", SourceFileMimeType = "plain/text", DestinationFile = "hello.asice", LibPath = null, UseAppPinInput = false });
+                yield return new Example("Sign text document", new AddSignCadesOptions() { ContainerFile = "signedDocument.asice", SourceFile = "hello.pdf", DestinationFile = "hello.asice", LibPath = null, UseAppPinInput = false });
+                yield return new Example("Sign text document with mime-type", new AddSignCadesOptions() { ContainerFile = "signedDocument.asice", SourceFile = "hello.pdf", SourceFileMimeType = "plain/text", DestinationFile = "hello.asice", LibPath = null, UseAppPinInput = false });
                 yield return new Example("Sign PNG image with application PIN typing", new AddSignCadesOptions() { ContainerFile = "signedDocument.asice", SourceFile = "hello.png", SourceFileMimeType = "image/png", DestinationFile = "hello.asice", UseAppPinInput = true });
                 yield return new Example("Sign PDF with specific PKCS11 lib", new AddSignCadesOptions() { ContainerFile = "signedDocument.asice", SourceFile = "document.pdf", SourceFileMimeType = "application/pdf", DestinationFile = "document.asice", LibPath = "/opt/SkEid/bin/pkcs11_x64.so", UseAppPinInput = false });
             }

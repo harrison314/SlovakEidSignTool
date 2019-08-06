@@ -35,7 +35,7 @@ namespace SlovakEidSignTool
             this.slot = slot ?? throw new ArgumentNullException(nameof(slot));
             this.RawCertificate = ckaValue ?? throw new ArgumentNullException(nameof(ckaValue));
             this.privateKeyHandle = privateKeyHandle ?? throw new ArgumentNullException(nameof(privateKeyHandle));
-            this.pinProvider = pinProvider;
+            this.pinProvider = pinProvider ?? throw new ArgumentNullException(nameof(pinProvider));
         }
 
         public byte[] SignSHA256Hash(byte[] hash)

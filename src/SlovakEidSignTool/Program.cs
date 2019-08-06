@@ -54,9 +54,9 @@ namespace SlovakEidSignTool
                 PdfSignerHelper.Sign(pkcs11ExternalSignature,
                     signedCertificate.ParsedCertificate,
                     opts.SourcePdf,
-                    opts.DestinationPdf);
+                    opts.DestinationFile);
 
-                Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourcePdf), opts.DestinationPdf);
+                Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourcePdf), opts.DestinationFile);
             }
 
             return 0;
