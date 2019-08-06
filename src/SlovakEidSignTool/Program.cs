@@ -13,7 +13,7 @@ namespace SlovakEidSignTool
     {
         public static int Main(string[] args)
         {
-            return Parser.Default.ParseArguments<ListCertOptions, SignPdfOptions, SignCadesOptions>(args)
+            return Parser.Default.ParseArguments<ListCertOptions, SignPdfOptions, SignCadesOptions, AddSignCadesOptions>(args)
                .MapResult(
                     (ListCertOptions opts) => ListCertificates(opts),
                     (SignPdfOptions opts) => SignPdf(opts),
@@ -95,7 +95,7 @@ namespace SlovakEidSignTool
                 Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
 
                 ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
-                ExtenCadesSigner signer = new ExtenCadesSigner(opts.ContainerFile);
+                ExtendedCadesSigner signer = new ExtendedCadesSigner(opts.ContainerFile);
 
                 if (!string.IsNullOrEmpty(opts.SourceFile))
                 {

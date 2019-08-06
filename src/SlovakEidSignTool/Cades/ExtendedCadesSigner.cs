@@ -9,13 +9,13 @@ using Org.BouncyCastle.X509;
 
 namespace SlovakEidSignTool.Cades
 {
-    public class ExtenCadesSigner : CadesSigner
+    public class ExtendedCadesSigner : CadesSigner
     {
         private const string ContainerMimeTypePath = "mimetype";
 
         private readonly string originalAsicePath;
 
-        public ExtenCadesSigner(string originalAsicePath)
+        public ExtendedCadesSigner(string originalAsicePath)
             : base()
         {
             this.originalAsicePath = originalAsicePath ?? throw new ArgumentNullException(nameof(SimpleCadesSigner));
@@ -57,7 +57,7 @@ namespace SlovakEidSignTool.Cades
 
                     foreach (var entry in archive.Entries)
                     {
-                        if (!entry.FullName.StartsWith("META-INF/", StringComparison.Ordinal) && string.Equals(entry.FullName, ContainerMimeTypePath, StringComparison.Ordinal))
+                        if (!entry.FullName.StartsWith("META-INF/", StringComparison.Ordinal) && !string.Equals(entry.FullName, ContainerMimeTypePath, StringComparison.Ordinal))
                         {
                             using (Stream contentStream = entry.Open())
                             {
