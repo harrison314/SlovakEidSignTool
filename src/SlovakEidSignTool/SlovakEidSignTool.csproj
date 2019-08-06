@@ -3,6 +3,15 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <TargetLatestRuntimePatch>false</TargetLatestRuntimePatch>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Authors>harrison314</Authors>
+    <Version>2.0.0</Version>
+    <PackageProjectUrl>https://github.com/harrison314/SlovakEidSignTool/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/harrison314/SlovakEidSignTool/</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Description>Example Slovak eID Sign Tool.</Description>
+    <Copyright>(c) harrison314</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
