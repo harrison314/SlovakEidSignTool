@@ -38,6 +38,11 @@ namespace SlovakEidSignTool.Cades
                 throw new ArgumentNullException(nameof(ouputFilePath));
             }
 
+            if (File.Exists(ouputFilePath))
+            {
+                File.Delete(ouputFilePath);
+            }
+
             File.Copy(this.originalAsicePath, ouputFilePath);
             try
             {
