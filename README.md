@@ -33,13 +33,25 @@ Used:
 
 ### Signing the Pdf file "Example.pdf"
  1. Insert eID card to card reader.
- 1. Run `dotnet SlovakEidSignTool.dll signPDF Example.pdf SignedPdf.pdf`.
+ 1. Run `dotnet SlovakEidSignTool.dll signPDF Example.pdf -o SignedPdf.pdf`.
  1. Type BOK.
  1. Type ZEP PIN.
 
  ### Signing the file into the CAdES ASiC-E container
  1. Insert eID card to card reader.
- 1. Run `dotnet SlovakEidSignTool.dll signCades example.txt text/plain SignedExample.asice` (signing file, mime-type of signing file, output signature file).
+ 1. Run `dotnet SlovakEidSignTool.dll signCades example.txt -o SignedExample.asice` (signing file, output signature file).
+ 1. Type BOK.
+ 1. Type ZEP PIN.
+
+ ### Add signature to existing CAdES ASiC-E container
+ 1. Insert eID card to card reader.
+ 1. Run `dotnet SlovakEidSignTool.dll addSignCades SignedExample.asice -o SignedExample_2s.asice`
+ 1. Type BOK.
+ 1. Type ZEP PIN.
+
+  ### Add file and signature to existing CAdES ASiC-E container
+ 1. Insert eID card to card reader.
+ 1. Run `dotnet SlovakEidSignTool.dll addSignCades SignedExample.asice additional.txt -o SignedExample_2s.asice`
  1. Type BOK.
  1. Type ZEP PIN.
 
