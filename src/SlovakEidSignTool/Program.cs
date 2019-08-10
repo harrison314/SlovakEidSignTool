@@ -11,6 +11,7 @@ namespace SlovakEidSignTool
 {
     public class Program
     {
+        [STAThread]
         public static int Main(string[] args)
         {
             return Parser.Default.ParseArguments<ListCertOptions, SignPdfOptions, SignCadesOptions, AddSignCadesOptions>(args)
