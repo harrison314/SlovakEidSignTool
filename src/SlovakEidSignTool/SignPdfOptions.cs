@@ -14,8 +14,8 @@ namespace SlovakEidSignTool
             set;
         }
 
-        [Option('e', "useEidClient", Default = null, HelpText = "Use eID client to set PINs.")]
-        public bool UseEidClientPin
+        [Option('p', "useAppPinInput", Default = null, HelpText = "Use this application to set PINs.")]
+        public bool UseAppPinInput
         {
             get;
             set;
@@ -28,8 +28,8 @@ namespace SlovakEidSignTool
             set;
         }
 
-        [Value(1, MetaName = "destinationPDF", HelpText = "Destination PDF file path for save signed PDF.")]
-        public string DestinationPdf
+        [Option('o', "destinationFile", HelpText = "Destination file path for save signed .asice file.", Required = true)]
+        public string DestinationFile
         {
             get;
             set;
@@ -45,9 +45,9 @@ namespace SlovakEidSignTool
         {
             get
             {
-                yield return new Example("Sign PDF", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationPdf = "helloWorld_signed.pdf", UseEidClientPin = false });
-                yield return new Example("Sign PDF with eID client for PIN typing", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationPdf = "helloWorld_signed.pdf", UseEidClientPin = true });
-                yield return new Example("Sign PDF with specific PKCS11 lib", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationPdf = "helloWorld_signed.pdf", LibPath = "/opt/SkEid/bin/pkcs11_x64.so", UseEidClientPin = false });
+                yield return new Example("Sign PDF", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationFile = "helloWorld_signed.pdf", UseAppPinInput = false });
+                yield return new Example("Sign PDF with application PIN typing", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationFile = "helloWorld_signed.pdf", UseAppPinInput = true });
+                yield return new Example("Sign PDF with specific PKCS11 lib", new SignPdfOptions() { SourcePdf = "helloWorld.pdf", DestinationFile = "helloWorld_signed.pdf", LibPath = "/opt/SkEid/bin/pkcs11_x64.so", UseAppPinInput = false });
             }
         }
     }

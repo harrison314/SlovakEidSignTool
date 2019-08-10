@@ -1,0 +1,9 @@
+- dat unsafe do release (vsade)
+https://stackoverflow.com/questions/11708497/com-library-initialization-failed-with-code-0x80010106-in-c-sharp
+ - nad Main dat [STAThread] na opravenie COM a eid klienta
+
+
+- ak zrusim podpisovanie tak to hodi Net.Pkcs11Interop.Common.Pkcs11Exception: Method C_Login returned CKR_FUNCTION_CANCELED - to osetrit
+
+- /Applications/eIDklient.app/Contents/Pkcs11/libPkcs11.dylib
+- /Applications/Aplikacia_pre_eID.app/Contents/Pkcs11/libPkcs11.dylib

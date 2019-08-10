@@ -11,13 +11,15 @@ namespace SlovakEidSignTool
 {
     public class Program
     {
+        [STAThread]
         public static int Main(string[] args)
         {
-            return Parser.Default.ParseArguments<ListCertOptions, SignPdfOptions, SignCadesOptions>(args)
+            return Parser.Default.ParseArguments<ListCertOptions, SignPdfOptions, SignCadesOptions, AddSignCadesOptions>(args)
                .MapResult(
-                    (ListCertOptions opts) => ListCertificates(opts),
-                    (SignPdfOptions opts) => SignPdf(opts),
-                    (SignCadesOptions opts) => SignCades(opts),
+                    (ListCertOptions opts) => HandleSpecificErrors(opts, ListCertificates),
+                    (SignPdfOptions opts) => HandleSpecificErrors(opts, SignPdf),
+                    (SignCadesOptions opts) => HandleSpecificErrors(opts, SignCades),
+                    (AddSignCadesOptions opts) => HandleSpecificErrors(opts, AddSignCades),
                     _ => 1);
         }
 
@@ -28,7 +30,7 @@ namespace SlovakEidSignTool
             Console.WriteLine("Certificates:");
             Console.WriteLine();
 
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin), opts.ListEp ? "SIG_EP" : "SIG_ZEP"))
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput), opts.ListEp ? "SIG_EP" : "SIG_ZEP"))
             {
                 foreach (X509Certificate2 certificate in cardDeviceController.ListCertificates())
                 {
@@ -43,7 +45,7 @@ namespace SlovakEidSignTool
         {
             string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
             Console.WriteLine("Load: {0}", eidLib);
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin)))
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput)))
             {
                 CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
                 Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
@@ -53,9 +55,9 @@ namespace SlovakEidSignTool
                 PdfSignerHelper.Sign(pkcs11ExternalSignature,
                     signedCertificate.ParsedCertificate,
                     opts.SourcePdf,
-                    opts.DestinationPdf);
+                    opts.DestinationFile);
 
-                Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourcePdf), opts.DestinationPdf);
+                Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourcePdf), opts.DestinationFile);
             }
 
             return 0;
@@ -65,15 +67,16 @@ namespace SlovakEidSignTool
         {
             string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
             Console.WriteLine("Load: {0}", eidLib);
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseEidClientPin)))
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput)))
             {
                 CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
                 Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
 
                 ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
-                CadesSigner signer = new CadesSigner();
+                SimpleCadesSigner signer = new SimpleCadesSigner();
 
-                signer.AddFile(new FileInfo(opts.SourceFile), opts.SourceFileMimeType);
+                string mimeType = string.IsNullOrEmpty(opts.SourceFileMimeType) ? MimeType.GetMimeTypeFromFileName(Path.GetFileName(opts.SourceFile)) : opts.SourceFileMimeType;
+                signer.AddFile(new FileInfo(opts.SourceFile), mimeType);
 
                 signer.CreateContainer(externalSignature, opts.DestinationFile);
 
@@ -83,6 +86,31 @@ namespace SlovakEidSignTool
             return 0;
         }
 
+        private static int AddSignCades(AddSignCadesOptions opts)
+        {
+            string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
+            Console.WriteLine("Load: {0}", eidLib);
+            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput)))
+            {
+                CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
+                Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
+
+                ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
+                ExtendedCadesSigner signer = new ExtendedCadesSigner(opts.ContainerFile);
+
+                if (!string.IsNullOrEmpty(opts.SourceFile))
+                {
+                    string mimeType = string.IsNullOrEmpty(opts.SourceFileMimeType) ? MimeType.GetMimeTypeFromFileName(Path.GetFileName(opts.SourceFile)) : opts.SourceFileMimeType;
+                    signer.AddFile(new FileInfo(opts.SourceFile), mimeType);
+                }
+
+                signer.CreateContainer(externalSignature, opts.DestinationFile);
+
+                Console.WriteLine("Add signature to {0} and saved to {1}", Path.GetFileName(opts.ContainerFile), opts.DestinationFile);
+            }
+
+            return 0;
+        }
 
         private static string FindEidLibrary()
         {
@@ -94,8 +122,10 @@ namespace SlovakEidSignTool
                 $@"C:/Program Files/EAC MW klient/pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
                 $@"C:/Program Files (x86)/EAC MW klient/pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
 
-                $@"/usr/lib/eidklient/libpkcs11_sig_{(IntPtr.Size == 4 ? "x86" : "x64")}.so"
-                // /Applications/eIDklient.app/Contents/Pkcs11/libPkcs11.dylib
+                $@"/usr/lib/eidklient/libpkcs11_sig_{(IntPtr.Size == 4 ? "x86" : "x64")}.so",
+
+                "/Applications/eIDklient.app/Contents/Pkcs11/libPkcs11.dylib",
+                "/Applications/Aplikacia_pre_eID.app/Contents/Pkcs11/libPkcs11.dylib"
             };
 
             foreach (string potentialPath in paths)
@@ -117,15 +147,38 @@ namespace SlovakEidSignTool
             throw new IOException("Not found PKCS#11 library.");
         }
 
-        private static IPinProvider CreatePinprovider(bool useEidClient)
+        private static IPinProvider CreatePinprovider(bool useAppPinInput)
         {
-            if (useEidClient)
+            if (useAppPinInput)
             {
-                return new EidPinProvider();
+                return new ConsolePinProvider();
             }
             else
             {
-                return new ConsolePinProvider();
+                return new EidPinProvider();
+            }
+        }
+
+        private static int HandleSpecificErrors<T>(T options, Func<T, int> action)
+        {
+            try
+            {
+                return action(options);
+            }
+            catch (Net.Pkcs11Interop.Common.Pkcs11Exception ex) when (ex.RV == Net.Pkcs11Interop.Common.CKR.CKR_FUNCTION_CANCELED)
+            {
+                Console.WriteLine("Operation canseled by user.");
+                return 1;
+            }
+            catch (Net.Pkcs11Interop.Common.Pkcs11Exception ex) when (ex.RV == Net.Pkcs11Interop.Common.CKR.CKR_PIN_INVALID)
+            {
+                Console.WriteLine("PIN has invalid.");
+                return 1;
+            }
+            catch (Net.Pkcs11Interop.Common.Pkcs11Exception ex) when (ex.RV == Net.Pkcs11Interop.Common.CKR.CKR_PIN_INCORRECT)
+            {
+                Console.WriteLine("PIN has incorrect.");
+                return 1;
             }
         }
     }

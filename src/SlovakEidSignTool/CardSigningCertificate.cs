@@ -6,6 +6,7 @@ using SlovakEidSignTool.LowLevelExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace SlovakEidSignTool
             this.slot = slot ?? throw new ArgumentNullException(nameof(slot));
             this.RawCertificate = ckaValue ?? throw new ArgumentNullException(nameof(ckaValue));
             this.privateKeyHandle = privateKeyHandle ?? throw new ArgumentNullException(nameof(privateKeyHandle));
-            this.pinProvider = pinProvider;
+            this.pinProvider = pinProvider ?? throw new ArgumentNullException(nameof(pinProvider));
         }
 
         public byte[] SignSHA256Hash(byte[] hash)
@@ -56,11 +57,17 @@ namespace SlovakEidSignTool
                 }
                 else
                 {
-                    byte[] pin = this.pinProvider.GetZepPin();
-
-                    using (Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS))
+                    SecureString pin = this.pinProvider.GetZepPin();
+                    try
                     {
-                        return session.SignWithAuth(mechanism, this.privateKeyHandle, pkcs1DigestInfo, pin);
+                        using (Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS))
+                        {
+                            return session.SignWithAuth(mechanism, this.privateKeyHandle, pkcs1DigestInfo, pin);
+                        }
+                    }
+                    finally
+                    {
+                        pin?.Dispose();
                     }
                 }
             }

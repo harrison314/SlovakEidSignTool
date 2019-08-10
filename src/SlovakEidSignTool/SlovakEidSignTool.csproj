@@ -1,9 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <TargetLatestRuntimePatch>false</TargetLatestRuntimePatch>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <Authors>harrison314</Authors>
+    <Version>2.0.0</Version>
+    <PackageProjectUrl>https://github.com/harrison314/SlovakEidSignTool/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/harrison314/SlovakEidSignTool/</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <Description>Example Slovak eID Sign Tool.</Description>
+    <Copyright>(c) harrison314</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,11 +19,4 @@
     <PackageReference Include="itext7" Version="7.1.2" />
     <PackageReference Include="Pkcs11Interop" Version="4.0.0.2" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Update="sga_1x07.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>

@@ -1,22 +1,17 @@
-﻿using System;
+﻿using Org.BouncyCastle.X509;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Org.BouncyCastle.X509;
 
 namespace SlovakEidSignTool.Cades
 {
-    public class CadesSigner
+    public abstract class CadesSigner
     {
-        private const string SignaturePath = "META-INF/signatureSkEid.p7s";
-        private const string ManifestPath = "META-INF/ASiCManifestSkEid.xml";
-        private const string ContainerMimeType = "application/vnd.etsi.asic-e+zip";
-        private const string ContainerMimeTypePath = "mimetype";
-
-        private readonly List<(FileInfo, string)> inputFiles;
+        protected readonly List<(FileInfo, string)> inputFiles;
 
         public CadesSigner()
         {
@@ -43,52 +38,9 @@ namespace SlovakEidSignTool.Cades
             this.inputFiles.Add((fileInfo, mimeType));
         }
 
-        public void CreateContainer(ICadesExternalSignature externalSigner, string ouputFilePath)
-        {
-            if (externalSigner == null)
-            {
-                throw new ArgumentNullException(nameof(externalSigner));
-            }
+        public abstract void CreateContainer(ICadesExternalSignature externalSigner, string ouputFilePath);
 
-            if (ouputFilePath == null)
-            {
-                throw new ArgumentNullException(nameof(ouputFilePath));
-            }
-
-            AsicManifestBuilder asicManifestBuilder = new AsicManifestBuilder();
-            asicManifestBuilder.AddP7Signature(SignaturePath);
-
-            foreach ((FileInfo file, string mimeType) in this.inputFiles)
-            {
-                using (Stream contentStream = file.OpenRead())
-                {
-                    asicManifestBuilder.AddFile(file.Name, mimeType, contentStream);
-                }
-            }
-
-            byte[] manifestData = asicManifestBuilder.ToByteArray();
-
-            Pkcs7DetachedSignatureGenerator p7Generator = new Pkcs7DetachedSignatureGenerator(externalSigner);
-
-            X509CertificateParser x509CertificateParser = new X509CertificateParser();
-            X509Certificate signingCertificate = x509CertificateParser.ReadCertificate(externalSigner.GetCertificate());
-
-            byte[] signature = p7Generator.GenerateP7s(manifestData, signingCertificate, this.BuildCertificatePath(signingCertificate));
-
-            using (ZipArchive archive = ZipFile.Open(ouputFilePath, ZipArchiveMode.Create))
-            {
-                this.AddFileToArchive(archive, ContainerMimeTypePath, ContainerMimeType);
-                this.AddFileToArchive(archive, ManifestPath, manifestData);
-                this.AddFileToArchive(archive, SignaturePath, signature);
-
-                foreach ((FileInfo file, _) in this.inputFiles)
-                {
-                    this.AddFileToArchive(archive, file.Name, file);
-                }
-            }
-        }
-
-        private void AddFileToArchive(ZipArchive archive, string name, string content)
+        protected void AddFileToArchive(ZipArchive archive, string name, string content)
         {
             ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(name);
             byte[] contentData = Encoding.UTF8.GetBytes(content);
@@ -99,7 +51,7 @@ namespace SlovakEidSignTool.Cades
             }
         }
 
-        private void AddFileToArchive(ZipArchive archive, string name, byte[] content)
+        protected void AddFileToArchive(ZipArchive archive, string name, byte[] content)
         {
             ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(name);
 
@@ -108,8 +60,7 @@ namespace SlovakEidSignTool.Cades
                 stream.Write(content, 0, content.Length);
             }
         }
-
-        private void AddFileToArchive(ZipArchive archive, string name, FileInfo contentFile)
+        protected void AddFileToArchive(ZipArchive archive, string name, FileInfo contentFile)
         {
             ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(name);
 
@@ -122,11 +73,11 @@ namespace SlovakEidSignTool.Cades
             }
         }
 
-        private IEnumerable<X509Certificate> BuildCertificatePath(X509Certificate signingCertificate)
+        protected IEnumerable<X509Certificate> BuildCertificatePath(X509Certificate signingCertificate)
         {
             //TODO: refactor
 
-            X509CertificateParser x509CertificateParser = new X509CertificateParser();
+            Org.BouncyCastle.X509.X509CertificateParser x509CertificateParser = new X509CertificateParser();
 
             return CertificateUtils.BuldChain(signingCertificate.GetEncoded())
                  .Select(t => x509CertificateParser.ReadCertificate(t));

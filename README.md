@@ -33,21 +33,37 @@ Used:
 
 ### Signing the Pdf file "Example.pdf"
  1. Insert eID card to card reader.
- 1. Run `dotnet SlovakEidSignTool.dll signPDF Example.pdf SignedPdf.pdf`.
+ 1. Run `dotnet SlovakEidSignTool.dll signPDF Example.pdf -o SignedPdf.pdf`.
  1. Type BOK.
  1. Type ZEP PIN.
 
  ### Signing the file into the CAdES ASiC-E container
  1. Insert eID card to card reader.
- 1. Run `dotnet SlovakEidSignTool.dll signCades example.txt text/plain SignedExample.asice` (signing file, mime-type of signing file, output signature file).
+ 1. Run `dotnet SlovakEidSignTool.dll signCades example.txt -o SignedExample.asice` (signing file, output signature file).
  1. Type BOK.
  1. Type ZEP PIN.
 
-Example on _Windows 7_ x86 with self-contained build:
+ ### Add signature to existing CAdES ASiC-E container
+ 1. Insert eID card to card reader.
+ 1. Run `dotnet SlovakEidSignTool.dll addSignCades SignedExample.asice -o SignedExample_2s.asice`
+ 1. Type BOK.
+ 1. Type ZEP PIN.
 
-![Signed dcument](doc/UsageWin7.png)
+  ### Add file and signature to existing CAdES ASiC-E container
+ 1. Insert eID card to card reader.
+ 1. Run `dotnet SlovakEidSignTool.dll addSignCades SignedExample.asice additional.txt -o SignedExample_2s.asice`
+ 1. Type BOK.
+ 1. Type ZEP PIN.
+
+Example on _Windows 10_ x64 with self-contained build:
+
+![Signed dcument](doc/UsageWin10WithEid.png)
 
 ![Signed dcument](doc/SignedDocument.png)
+
+Example on _Windows 10_ x64 with self-contained build and application PINs:
+
+![Signed dcument](doc/UsageWin10WithPin.png)
 
 Validation result in [zep.disig.sk](https://zep.disig.sk/) of _CAdES_ signature: 
 

@@ -18,8 +18,15 @@ namespace SlovakEidSignTool
             set;
         }
 
-        [Option('e', "useEidClient", Default = null, HelpText = "Use eID client to set PINs.")]
-        public bool UseEidClientPin
+        [Option('p', "useAppPinInput", Default = null, HelpText = "Use this application to set PINs.")]
+        public bool UseAppPinInput
+        {
+            get;
+            set;
+        }
+
+        [Option('m', "mimeType", HelpText = "Source file mime-type. Eg. text/plain, image/png,...", Required = false, Default = null)]
+        public string SourceFileMimeType
         {
             get;
             set;
@@ -32,14 +39,7 @@ namespace SlovakEidSignTool
             set;
         }
 
-        [Value(1, MetaName = "mimeType", HelpText = "Source file mime-type. Eg. text/plain, image/png,...")]
-        public string SourceFileMimeType
-        {
-            get;
-            set;
-        }
-
-        [Value(2, MetaName = "destinationFile", HelpText = "Destination file path for save signed .asice file.")]
+        [Option('o', "destinationFile", HelpText = "Destination file path for save signed .asice file.", Required = true)]
         public string DestinationFile
         {
             get;
@@ -56,9 +56,10 @@ namespace SlovakEidSignTool
         {
             get
             {
-                yield return new Example("Sign text document", new SignCadesOptions() { SourceFile = "hello.pdf", SourceFileMimeType = "plain/text", DestinationFile = "hello.asice", LibPath = null, UseEidClientPin = false });
-                yield return new Example("Sign PNG image with eID client for PIN typing", new SignCadesOptions() { SourceFile = "hello.png", SourceFileMimeType = "image/png", DestinationFile = "hello.asice", UseEidClientPin = true });
-                yield return new Example("Sign PDF with specific PKCS11 lib", new SignCadesOptions() { SourceFile = "document.pdf", SourceFileMimeType = "application/pdf", DestinationFile = "document.asice", LibPath = "/opt/SkEid/bin/pkcs11_x64.so", UseEidClientPin = false });
+                yield return new Example("Sign text document", new SignCadesOptions() { SourceFile = "hello.pdf", DestinationFile = "hello.asice", LibPath = null, UseAppPinInput = false });
+                yield return new Example("Sign text document with mime-type", new SignCadesOptions() { SourceFile = "hello.pdf", SourceFileMimeType = "plain/text", DestinationFile = "hello.asice", LibPath = null, UseAppPinInput = false });
+                yield return new Example("Sign PNG image with application PIN typing", new SignCadesOptions() { SourceFile = "hello.png", SourceFileMimeType = "image/png", DestinationFile = "hello.asice", UseAppPinInput = true });
+                yield return new Example("Sign PDF with specific PKCS11 lib", new SignCadesOptions() { SourceFile = "document.pdf", SourceFileMimeType = "application/pdf", DestinationFile = "document.asice", LibPath = "/opt/SkEid/bin/pkcs11_x64.so", UseAppPinInput = false });
             }
         }
     }

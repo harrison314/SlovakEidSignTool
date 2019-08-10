@@ -26,6 +26,32 @@ namespace SlovakEidSignTool.Cades
             this.document.Root.Add(new XComment("Created using SlovakEidSignTool - https://github.com/harrison314/SlovakEidSignTool"));
         }
 
+        protected AsicManifestBuilder(XDocument existing)
+        {
+            if (existing == null) throw new ArgumentNullException(nameof(existing));
+
+            if (!string.Equals(existing.Root.Name.LocalName, "ASiCManifest", StringComparison.Ordinal)
+                || existing.Root.Name.Namespace != this.asic)
+            {
+                throw new ArgumentException("Is not ASiCManifest.");
+            }
+
+            this.document = existing;
+            XElement signatureRef = this.document.Root.Descendants(this.asic + "SigReference").SingleOrDefault();
+            if (signatureRef != null)
+            {
+                signatureRef.Remove();
+            }
+        }
+
+        public static AsicManifestBuilder FromExisting(byte[] manifestData)
+        {
+            if (manifestData == null) throw new ArgumentNullException(nameof(manifestData));
+            XDocument document = XDocument.Parse(Encoding.UTF8.GetString(manifestData));
+
+            return new AsicManifestBuilder(document);
+        }
+
         public void AddP7Signature(string path)
         {
             if (path == null) throw new ArgumentNullException(nameof(path));
