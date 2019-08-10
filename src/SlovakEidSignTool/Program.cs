@@ -122,8 +122,10 @@ namespace SlovakEidSignTool
                 $@"C:/Program Files/EAC MW klient/pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
                 $@"C:/Program Files (x86)/EAC MW klient/pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
 
-                $@"/usr/lib/eidklient/libpkcs11_sig_{(IntPtr.Size == 4 ? "x86" : "x64")}.so"
-                // /Applications/eIDklient.app/Contents/Pkcs11/libPkcs11.dylib
+                $@"/usr/lib/eidklient/libpkcs11_sig_{(IntPtr.Size == 4 ? "x86" : "x64")}.so",
+
+                "/Applications/eIDklient.app/Contents/Pkcs11/libPkcs11.dylib",
+                "/Applications/Aplikacia_pre_eID.app/Contents/Pkcs11/libPkcs11.dylib"
             };
 
             foreach (string potentialPath in paths)
