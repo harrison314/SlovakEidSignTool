@@ -16,10 +16,10 @@ namespace SlovakEidSignTool
         {
             return Parser.Default.ParseArguments<ListCertOptions, SignPdfOptions, SignCadesOptions, AddSignCadesOptions>(args)
                .MapResult(
-                    (ListCertOptions opts) => ListCertificates(opts),
-                    (SignPdfOptions opts) => SignPdf(opts),
-                    (SignCadesOptions opts) => SignCades(opts),
-                    (AddSignCadesOptions opts) => AddSignCades(opts),
+                    (ListCertOptions opts) => HandleSpecificErrors(opts, ListCertificates),
+                    (SignPdfOptions opts) => HandleSpecificErrors(opts, SignPdf),
+                    (SignCadesOptions opts) => HandleSpecificErrors(opts, SignCades),
+                    (AddSignCadesOptions opts) => HandleSpecificErrors(opts, AddSignCades),
                     _ => 1);
         }
 
@@ -156,6 +156,29 @@ namespace SlovakEidSignTool
             else
             {
                 return new EidPinProvider();
+            }
+        }
+
+        private static int HandleSpecificErrors<T>(T options, Func<T, int> action)
+        {
+            try
+            {
+                return action(options);
+            }
+            catch (Net.Pkcs11Interop.Common.Pkcs11Exception ex) when (ex.RV == Net.Pkcs11Interop.Common.CKR.CKR_FUNCTION_CANCELED)
+            {
+                Console.WriteLine("Operation canseled by user.");
+                return 1;
+            }
+            catch (Net.Pkcs11Interop.Common.Pkcs11Exception ex) when (ex.RV == Net.Pkcs11Interop.Common.CKR.CKR_PIN_INVALID)
+            {
+                Console.WriteLine("PIN has invalid.");
+                return 1;
+            }
+            catch (Net.Pkcs11Interop.Common.Pkcs11Exception ex) when (ex.RV == Net.Pkcs11Interop.Common.CKR.CKR_PIN_INCORRECT)
+            {
+                Console.WriteLine("PIN has incorrect.");
+                return 1;
             }
         }
     }
