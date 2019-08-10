@@ -55,11 +55,15 @@ Used:
  1. Type BOK.
  1. Type ZEP PIN.
 
-Example on _Windows 7_ x86 with self-contained build:
+Example on _Windows 10_ x64 with self-contained build:
 
-![Signed dcument](doc/UsageWin7.png)
+![Signed dcument](doc/UsageWin10WithEid.png)
 
 ![Signed dcument](doc/SignedDocument.png)
+
+Example on _Windows 10_ x64 with self-contained build and application PINs:
+
+![Signed dcument](doc/UsageWin10WithPin.png)
 
 # Build
 
