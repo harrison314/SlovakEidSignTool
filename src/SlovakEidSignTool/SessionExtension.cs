@@ -9,7 +9,7 @@ using Net.Pkcs11Interop.Common;
 using Net.Pkcs11Interop.HighLevelAPI;
 using PkcsExtensions;
 
-namespace SlovakEidSignTool.LowLevelExtensions
+namespace SlovakEidSignTool
 {
     public static class SessionExtension
     {

@@ -2,7 +2,6 @@
 using Net.Pkcs11Interop.HighLevelAPI;
 using Org.BouncyCastle.Asn1;
 using Org.BouncyCastle.Asn1.X509;
-using SlovakEidSignTool.LowLevelExtensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

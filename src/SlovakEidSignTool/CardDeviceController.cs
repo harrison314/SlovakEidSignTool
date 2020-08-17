@@ -7,7 +7,6 @@ using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Net.Pkcs11Interop.HighLevelAPI.MechanismParams;
 using System.Security;
-using SlovakEidSignTool.LowLevelExtensions;
 
 namespace SlovakEidSignTool
 {
