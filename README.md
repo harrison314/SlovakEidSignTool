@@ -8,7 +8,7 @@ This project aim to education [PKCS#11 standard](https://www.cryptsoft.com/pkcs1
 _SlovakEidSignTool_ is example project for signing PDFs using Slovak eID (eID with _ZEP / KEP_), designed for learning.
 
 Used:
-* .Net Core 2.1 - multi-platform,
+* .Net Core 3.1 - multi-platform,
 * [PKCS#11 Interop](https://pkcs11interop.net/) for communication with eID "driver" (or other hardware token),
 * [iTextSharp](https://github.com/itext/itextsharp) library.
 * [commandline](https://github.com/commandlineparser/commandline) for parsing command line arguments.
