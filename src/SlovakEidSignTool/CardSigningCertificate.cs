@@ -49,7 +49,7 @@ namespace SlovakEidSignTool
             }
             else
             {
-                SecureString pin = this.pinProvider.GetZepPin();
+                SecureString pin = this.pinProvider.GetKepPin();
                 try
                 {
                     using IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);

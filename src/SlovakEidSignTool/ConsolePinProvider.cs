@@ -28,7 +28,7 @@ namespace SlovakEidSignTool
             }
         }
 
-        public SecureString GetZepPin()
+        public SecureString GetKepPin()
         {
             try
             {

@@ -18,9 +18,9 @@ namespace SlovakEidSignTool
         SecureString GetBokPin();
 
         /// <summary>
-        /// Gets the ZEP PIN from user.
+        /// Gets the KEP PIN from user.
         /// </summary>
-        /// <returns>User ZEP PIN.</returns>
-        SecureString GetZepPin();
+        /// <returns>User KEP PIN.</returns>
+        SecureString GetKepPin();
     }
 }

@@ -20,7 +20,7 @@ namespace SlovakEidSignTool
             return null;
         }
 
-        public SecureString GetZepPin()
+        public SecureString GetKepPin()
         {
             Console.WriteLine("Type KEP PIN using eID client");
             return null;
