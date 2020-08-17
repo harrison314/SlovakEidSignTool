@@ -44,7 +44,8 @@ namespace SlovakEidSignTool
             if (hash.Length != 32) throw new ArgumentOutOfRangeException($"SHA-256 hash has 32 bits");
 
             // PKCS 1 Digest info for SHA-256, 2.16.840.1.101.3.4.2.1 is oid for SHA-256
-            byte[] pkcs1DigestInfo = this.CreateDigestInfo(hash, "2.16.840.1.101.3.4.2.1");
+            byte[] pkcs1DigestInfo = this.CreateDigestInfo(hash, 
+                PkcsExtensions.HashAlgorithmConvertor.ToOid(System.Security.Cryptography.HashAlgorithmName.SHA256));
 
             using ISession session = this.slot.OpenSession(SessionType.ReadOnly);
             if (this.pinProvider == null)
@@ -58,7 +59,7 @@ namespace SlovakEidSignTool
                 try
                 {
                     using IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
-                    return session.Sign(mechanism, this.privateKeyHandle, pkcs1DigestInfo, pin);
+                    return session.Sign(mechanism, this.privateKeyHandle, pin, pkcs1DigestInfo);
                 }
                 finally
                 {
