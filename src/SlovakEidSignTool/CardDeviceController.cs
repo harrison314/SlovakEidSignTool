@@ -13,10 +13,10 @@ namespace SlovakEidSignTool
 {
     public class CardDeviceController : IDisposable
     {
-        private readonly Slot slot;
-        private readonly Session loginSession;
+        private readonly ISlot slot;
+        private readonly ISession loginSession;
         private readonly IPinProvider pinProvider;
-        private readonly Pkcs11 pkcs11;
+        private readonly IPkcs11Library pkcs11;
 
         private bool disposedValue = false;
 
@@ -26,11 +26,13 @@ namespace SlovakEidSignTool
             if (pinProvider == null) throw new ArgumentNullException(nameof(pinProvider));
 
             this.pinProvider = pinProvider;
-            this.pkcs11 = new Pkcs11(pkcs11Libpath, AppType.SingleThreaded);
+            Pkcs11InteropFactories factories = new Pkcs11InteropFactories();
+
+            this.pkcs11 = factories.Pkcs11LibraryFactory.LoadPkcs11Library(factories, pkcs11Libpath, AppType.SingleThreaded);
 
             try
             {
-                List<Slot> slots = this.pkcs11.GetSlotList(SlotsType.WithTokenPresent);
+                List<ISlot> slots = this.pkcs11.GetSlotList(SlotsType.WithTokenPresent);
                 this.slot = slots.SingleOrDefault(t => string.IsNullOrEmpty(zepLabel) || string.Equals(t.GetTokenInfo().Label, zepLabel, StringComparison.Ordinal));
                 if (this.slot == null)
                 {
@@ -64,12 +66,10 @@ namespace SlovakEidSignTool
         public IReadOnlyList<X509Certificate2> ListCertificates()
         {
             List<X509Certificate2> certificates = new List<X509Certificate2>();
-            using (Session session = this.slot.OpenSession(SessionType.ReadOnly))
+            using ISession session = this.slot.OpenSession(SessionType.ReadOnly);
+            foreach (var (_, _, ckaValue) in this.FindCertificates(session))
             {
-                foreach (var (_, _, ckaValue) in this.FindCertificates(session))
-                {
-                    certificates.Add(new X509Certificate2(ckaValue));
-                }
+                certificates.Add(new X509Certificate2(ckaValue));
             }
 
             return certificates;
@@ -79,24 +79,22 @@ namespace SlovakEidSignTool
         {
             List<CardSigningCertificate> result = new List<CardSigningCertificate>();
 
-            using (Session session = this.slot.OpenSession(SessionType.ReadOnly))
+            using ISession session = this.slot.OpenSession(SessionType.ReadOnly);
+            foreach (var (ckaId, ckaLabel, ckaValue) in this.FindCertificates(session))
             {
-                foreach (var (ckaId, ckaLabel, ckaValue) in this.FindCertificates(session))
+                X509Certificate2 certificate = new X509Certificate2(ckaValue);
+                if (this.IsCertificateForSigning(certificate))
                 {
-                    X509Certificate2 certificate = new X509Certificate2(ckaValue);
-                    if (this.IsCertificateForSigning(certificate))
+                    IObjectHandle privateKeyhandle = this.FindPrivateKey(session, ckaId, ckaLabel);
+                    if (privateKeyhandle == null)
                     {
-                        ObjectHandle privateKeyhandle = this.FindPrivateKey(session, ckaId, ckaLabel);
-                        if (privateKeyhandle == null)
-                        {
-                            continue;
-                        }
-
-                        List<ObjectAttribute> privateKeyAttr = session.GetAttributeValue(privateKeyhandle, new List<CKA>() { CKA.CKA_ALWAYS_AUTHENTICATE });
-                        bool isAwaisAuth = privateKeyAttr[0].GetValueAsBool();
-
-                        result.Add(new CardSigningCertificate(this.slot, ckaValue, privateKeyhandle, isAwaisAuth ? this.pinProvider : null));
+                        continue;
                     }
+
+                    List<IObjectAttribute> privateKeyAttr = session.GetAttributeValue(privateKeyhandle, new List<CKA>() { CKA.CKA_ALWAYS_AUTHENTICATE });
+                    bool isAwaisAuth = privateKeyAttr[0].GetValueAsBool();
+
+                    result.Add(new CardSigningCertificate(this.slot, ckaValue, privateKeyhandle, isAwaisAuth ? this.pinProvider : null));
                 }
             }
 
@@ -124,31 +122,31 @@ namespace SlovakEidSignTool
             return false;
         }
 
-        private ObjectHandle FindPrivateKey(Session session, byte[] ckaId, string ckaLabel)
+        private IObjectHandle FindPrivateKey(ISession session, byte[] ckaId, string ckaLabel)
         {
-            List<ObjectAttribute> searchTemplate = new List<ObjectAttribute>()
+            List<IObjectAttribute> searchTemplate = new List<IObjectAttribute>()
             {
-                new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_PRIVATE_KEY),
-                new ObjectAttribute(CKA.CKA_TOKEN, true),
-                new ObjectAttribute(CKA.CKA_ID, ckaId),
-                new ObjectAttribute(CKA.CKA_LABEL, ckaLabel)
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_PRIVATE_KEY),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, ckaLabel)
             };
 
             return session.FindAllObjects(searchTemplate).FirstOrDefault();
         }
 
-        private IEnumerable<(byte[] ckaId, string ckaLabel, byte[] ckaValue)> FindCertificates(Session session)
+        private IEnumerable<(byte[] ckaId, string ckaLabel, byte[] ckaValue)> FindCertificates(ISession session)
         {
-            List<ObjectAttribute> searchTemplate = new List<ObjectAttribute>()
-                {
-                    new ObjectAttribute(CKA.CKA_CLASS, CKO.CKO_CERTIFICATE),
-                    new ObjectAttribute(CKA.CKA_TOKEN, true),
-                    new ObjectAttribute(CKA.CKA_CERTIFICATE_TYPE, CKC.CKC_X_509)
-                };
-
-            foreach (ObjectHandle certHandle in session.FindAllObjects(searchTemplate))
+            List<IObjectAttribute> searchTemplate = new List<IObjectAttribute>()
             {
-                List<ObjectAttribute> objectAttributes = session.GetAttributeValue(certHandle, new List<CKA>() { CKA.CKA_ID, CKA.CKA_LABEL, CKA.CKA_VALUE });
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_CERTIFICATE),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true),
+                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CERTIFICATE_TYPE, CKC.CKC_X_509)
+            };
+
+            foreach (IObjectHandle certHandle in session.FindAllObjects(searchTemplate))
+            {
+                List<IObjectAttribute> objectAttributes = session.GetAttributeValue(certHandle, new List<CKA>() { CKA.CKA_ID, CKA.CKA_LABEL, CKA.CKA_VALUE });
 
                 byte[] ckaId = objectAttributes[0].GetValueAsByteArray();
                 string ckaLabel = objectAttributes[1].GetValueAsString();
@@ -160,9 +158,9 @@ namespace SlovakEidSignTool
             }
         }
 
-        private bool SessionIsAuthenticated(Session session)
+        private bool SessionIsAuthenticated(ISession session)
         {
-            SessionInfo sessionInfo = session.GetSessionInfo();
+            ISessionInfo sessionInfo = session.GetSessionInfo();
             switch (sessionInfo.State)
             {
                 case CKS.CKS_RO_PUBLIC_SESSION:

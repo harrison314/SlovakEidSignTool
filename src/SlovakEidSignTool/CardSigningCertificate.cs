@@ -15,8 +15,8 @@ namespace SlovakEidSignTool
 {
     public class CardSigningCertificate
     {
-        private readonly Slot slot;
-        private readonly ObjectHandle privateKeyHandle;
+        private readonly ISlot slot;
+        private readonly IObjectHandle privateKeyHandle;
         private readonly IPinProvider pinProvider;
 
         public byte[] RawCertificate
@@ -30,7 +30,7 @@ namespace SlovakEidSignTool
             get => new X509Certificate2(this.RawCertificate);
         }
 
-        public CardSigningCertificate(Slot slot, byte[] ckaValue, ObjectHandle privateKeyHandle, IPinProvider pinProvider)
+        public CardSigningCertificate(ISlot slot, byte[] ckaValue, IObjectHandle privateKeyHandle, IPinProvider pinProvider)
         {
             this.slot = slot ?? throw new ArgumentNullException(nameof(slot));
             this.RawCertificate = ckaValue ?? throw new ArgumentNullException(nameof(ckaValue));
@@ -46,10 +46,10 @@ namespace SlovakEidSignTool
             // PKCS 1 Digest info for SHA-256, 2.16.840.1.101.3.4.2.1 is oid for SHA-256
             byte[] pkcs1DigestInfo = this.CreateDigestInfo(hash, "2.16.840.1.101.3.4.2.1");
 
-            using Session session = this.slot.OpenSession(SessionType.ReadOnly);
+            using ISession session = this.slot.OpenSession(SessionType.ReadOnly);
             if (this.pinProvider == null)
             {
-                using Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS);
+                using IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
                 return session.Sign(mechanism, this.privateKeyHandle, pkcs1DigestInfo);
             }
             else
@@ -57,8 +57,8 @@ namespace SlovakEidSignTool
                 SecureString pin = this.pinProvider.GetZepPin();
                 try
                 {
-                    using Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS);
-                    return session.SignWithAuth(mechanism, this.privateKeyHandle, pkcs1DigestInfo, pin);
+                    using IMechanism mechanism = session.Factories.MechanismFactory.Create(CKM.CKM_RSA_PKCS);
+                    return session.Sign(mechanism, this.privateKeyHandle, pkcs1DigestInfo, pin);
                 }
                 finally
                 {
