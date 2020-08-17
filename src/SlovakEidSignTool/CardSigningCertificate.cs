@@ -25,11 +25,6 @@ namespace SlovakEidSignTool
             protected set;
         }
 
-        public X509Certificate2 ParsedCertificate
-        {
-            get => new X509Certificate2(this.RawCertificate);
-        }
-
         public CardSigningCertificate(ISlot slot, byte[] ckaValue, IObjectHandle privateKeyHandle, IPinProvider pinProvider)
         {
             this.slot = slot ?? throw new ArgumentNullException(nameof(slot));
@@ -66,6 +61,11 @@ namespace SlovakEidSignTool
                     pin?.Dispose();
                 }
             }
+        }
+
+        public X509Certificate2 GetCertificate()
+        {
+            return new X509Certificate2(this.RawCertificate);
         }
 
         private byte[] CreateDigestInfo(byte[] hash, string hashOid)

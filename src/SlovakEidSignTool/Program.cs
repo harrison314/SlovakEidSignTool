@@ -45,20 +45,19 @@ namespace SlovakEidSignTool
         {
             string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
             Console.WriteLine("Load: {0}", eidLib);
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput)))
-            {
-                CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
-                Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
+            using CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput));
+            CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
+            using X509Certificate2 certificate = signedCertificate.GetCertificate();
+            Console.WriteLine("Signing certificate with subject: {0}", certificate.Subject);
 
-                Pkcs11ExternalSignature pkcs11ExternalSignature = new Pkcs11ExternalSignature(signedCertificate);
+            Pkcs11ExternalSignature pkcs11ExternalSignature = new Pkcs11ExternalSignature(signedCertificate);
 
-                PdfSignerHelper.Sign(pkcs11ExternalSignature,
-                    signedCertificate.ParsedCertificate,
-                    opts.SourcePdf,
-                    opts.DestinationFile);
+            PdfSignerHelper.Sign(pkcs11ExternalSignature,
+                certificate,
+                opts.SourcePdf,
+                opts.DestinationFile);
 
-                Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourcePdf), opts.DestinationFile);
-            }
+            Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourcePdf), opts.DestinationFile);
 
             return 0;
         }
@@ -67,21 +66,20 @@ namespace SlovakEidSignTool
         {
             string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
             Console.WriteLine("Load: {0}", eidLib);
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput)))
-            {
-                CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
-                Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
+            using CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput));
+            CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
+            using X509Certificate2 certificate = signedCertificate.GetCertificate();
+            Console.WriteLine("Signing certificate with subject: {0}", certificate.Subject);
 
-                ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
-                SimpleCadesSigner signer = new SimpleCadesSigner();
+            ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
+            SimpleCadesSigner signer = new SimpleCadesSigner();
 
-                string mimeType = string.IsNullOrEmpty(opts.SourceFileMimeType) ? MimeType.GetMimeTypeFromFileName(Path.GetFileName(opts.SourceFile)) : opts.SourceFileMimeType;
-                signer.AddFile(new FileInfo(opts.SourceFile), mimeType);
+            string mimeType = string.IsNullOrEmpty(opts.SourceFileMimeType) ? MimeType.GetMimeTypeFromFileName(Path.GetFileName(opts.SourceFile)) : opts.SourceFileMimeType;
+            signer.AddFile(new FileInfo(opts.SourceFile), mimeType);
 
-                signer.CreateContainer(externalSignature, opts.DestinationFile);
+            signer.CreateContainer(externalSignature, opts.DestinationFile);
 
-                Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourceFile), opts.DestinationFile);
-            }
+            Console.WriteLine("{0} signed and saved to {1}", Path.GetFileName(opts.SourceFile), opts.DestinationFile);
 
             return 0;
         }
@@ -90,24 +88,23 @@ namespace SlovakEidSignTool
         {
             string eidLib = string.IsNullOrEmpty(opts.LibPath) ? FindEidLibrary() : opts.LibPath;
             Console.WriteLine("Load: {0}", eidLib);
-            using (CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput)))
+            using CardDeviceController cardDeviceController = new CardDeviceController(eidLib, CreatePinprovider(opts.UseAppPinInput));
+            CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
+            using X509Certificate2 certificate = signedCertificate.GetCertificate();
+            Console.WriteLine("Signing certificate with subject: {0}", certificate.Subject);
+
+            ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
+            ExtendedCadesSigner signer = new ExtendedCadesSigner(opts.ContainerFile);
+
+            if (!string.IsNullOrEmpty(opts.SourceFile))
             {
-                CardSigningCertificate signedCertificate = cardDeviceController.GetSignedCertificates().Single();
-                Console.WriteLine("Signing certificate with subject: {0}", signedCertificate.ParsedCertificate.Subject);
-
-                ICadesExternalSignature externalSignature = new CadesExternalSignature(signedCertificate);
-                ExtendedCadesSigner signer = new ExtendedCadesSigner(opts.ContainerFile);
-
-                if (!string.IsNullOrEmpty(opts.SourceFile))
-                {
-                    string mimeType = string.IsNullOrEmpty(opts.SourceFileMimeType) ? MimeType.GetMimeTypeFromFileName(Path.GetFileName(opts.SourceFile)) : opts.SourceFileMimeType;
-                    signer.AddFile(new FileInfo(opts.SourceFile), mimeType);
-                }
-
-                signer.CreateContainer(externalSignature, opts.DestinationFile);
-
-                Console.WriteLine("Add signature to {0} and saved to {1}", Path.GetFileName(opts.ContainerFile), opts.DestinationFile);
+                string mimeType = string.IsNullOrEmpty(opts.SourceFileMimeType) ? MimeType.GetMimeTypeFromFileName(Path.GetFileName(opts.SourceFile)) : opts.SourceFileMimeType;
+                signer.AddFile(new FileInfo(opts.SourceFile), mimeType);
             }
+
+            signer.CreateContainer(externalSignature, opts.DestinationFile);
+
+            Console.WriteLine("Add signature to {0} and saved to {1}", Path.GetFileName(opts.ContainerFile), opts.DestinationFile);
 
             return 0;
         }
