@@ -24,7 +24,7 @@ namespace SlovakEidSignTool.Pdf
             Org.BouncyCastle.X509.X509Certificate[] chain = new Org.BouncyCastle.X509.X509Certificate[] { bCert };
 
             using FileStream stream = new FileStream(destinationPdfPath, FileMode.OpenOrCreate);
-            PdfSigner signer = new PdfSigner(reader, stream, false);
+            PdfSigner signer = new PdfSigner(reader, stream, new StampingProperties());
             signer.SetSignatureEvent(new SignatureEvent());
             signer.SignDetached(externalSignature, chain, null, null, null, 0, PdfSigner.CryptoStandard.CADES);
         }
