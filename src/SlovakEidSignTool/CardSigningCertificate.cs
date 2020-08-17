@@ -46,29 +46,23 @@ namespace SlovakEidSignTool
             // PKCS 1 Digest info for SHA-256, 2.16.840.1.101.3.4.2.1 is oid for SHA-256
             byte[] pkcs1DigestInfo = this.CreateDigestInfo(hash, "2.16.840.1.101.3.4.2.1");
 
-            using (Session session = this.slot.OpenSession(SessionType.ReadOnly))
+            using Session session = this.slot.OpenSession(SessionType.ReadOnly);
+            if (this.pinProvider == null)
             {
-                if (this.pinProvider == null)
+                using Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS);
+                return session.Sign(mechanism, this.privateKeyHandle, pkcs1DigestInfo);
+            }
+            else
+            {
+                SecureString pin = this.pinProvider.GetZepPin();
+                try
                 {
-                    using (Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS))
-                    {
-                        return session.Sign(mechanism, this.privateKeyHandle, pkcs1DigestInfo);
-                    }
+                    using Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS);
+                    return session.SignWithAuth(mechanism, this.privateKeyHandle, pkcs1DigestInfo, pin);
                 }
-                else
+                finally
                 {
-                    SecureString pin = this.pinProvider.GetZepPin();
-                    try
-                    {
-                        using (Mechanism mechanism = new Mechanism(CKM.CKM_RSA_PKCS))
-                        {
-                            return session.SignWithAuth(mechanism, this.privateKeyHandle, pkcs1DigestInfo, pin);
-                        }
-                    }
-                    finally
-                    {
-                        pin?.Dispose();
-                    }
+                    pin?.Dispose();
                 }
             }
         }

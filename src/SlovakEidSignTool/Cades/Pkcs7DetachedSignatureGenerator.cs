@@ -177,10 +177,8 @@ namespace SlovakEidSignTool.Cades
 
         private byte[] ComputeHash(byte[] data)
         {
-            using (System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create())
-            {
-                return sha256.ComputeHash(data);
-            }
+            using System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create();
+            return sha256.ComputeHash(data);
         }
     }
 }

@@ -45,32 +45,24 @@ namespace SlovakEidSignTool.Cades
             ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(name);
             byte[] contentData = Encoding.UTF8.GetBytes(content);
 
-            using (Stream stream = zipArchiveEntry.Open())
-            {
-                stream.Write(contentData, 0, contentData.Length);
-            }
+            using Stream stream = zipArchiveEntry.Open();
+            stream.Write(contentData, 0, contentData.Length);
         }
 
         protected void AddFileToArchive(ZipArchive archive, string name, byte[] content)
         {
             ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(name);
 
-            using (Stream stream = zipArchiveEntry.Open())
-            {
-                stream.Write(content, 0, content.Length);
-            }
+            using Stream stream = zipArchiveEntry.Open();
+            stream.Write(content, 0, content.Length);
         }
         protected void AddFileToArchive(ZipArchive archive, string name, FileInfo contentFile)
         {
             ZipArchiveEntry zipArchiveEntry = archive.CreateEntry(name);
 
-            using (Stream fileStream = contentFile.OpenRead())
-            {
-                using (Stream stream = zipArchiveEntry.Open())
-                {
-                    fileStream.CopyTo(stream);
-                }
-            }
+            using Stream fileStream = contentFile.OpenRead();
+            using Stream stream = zipArchiveEntry.Open();
+            fileStream.CopyTo(stream);
         }
 
         protected IEnumerable<X509Certificate> BuildCertificatePath(X509Certificate signingCertificate)

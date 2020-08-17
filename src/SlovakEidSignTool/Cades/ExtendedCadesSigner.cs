@@ -46,45 +46,39 @@ namespace SlovakEidSignTool.Cades
             File.Copy(this.originalAsicePath, ouputFilePath);
             try
             {
-                using (ZipArchive archive = ZipFile.Open(ouputFilePath, ZipArchiveMode.Update))
+                using ZipArchive archive = ZipFile.Open(ouputFilePath, ZipArchiveMode.Update);
+                (string signaturePath, string manifestPath) = this.CreateMetadatNames(archive);
+                AsicManifestBuilder asicManifestBuilder = new AsicManifestBuilder();
+                asicManifestBuilder.AddP7Signature(signaturePath);
+
+                foreach ((FileInfo file, string mimeType) in this.inputFiles)
                 {
-                    (string signaturePath, string manifestPath) = this.CreateMetadatNames(archive);
-                    AsicManifestBuilder asicManifestBuilder = new AsicManifestBuilder();
-                    asicManifestBuilder.AddP7Signature(signaturePath);
+                    using Stream contentStream = file.OpenRead();
+                    asicManifestBuilder.AddFile(file.Name, mimeType, contentStream);
+                }
 
-                    foreach ((FileInfo file, string mimeType) in this.inputFiles)
+                foreach (var entry in archive.Entries)
+                {
+                    if (!entry.FullName.StartsWith("META-INF/", StringComparison.Ordinal) && !string.Equals(entry.FullName, ContainerMimeTypePath, StringComparison.Ordinal))
                     {
-                        using (Stream contentStream = file.OpenRead())
-                        {
-                            asicManifestBuilder.AddFile(file.Name, mimeType, contentStream);
-                        }
+                        using Stream contentStream = entry.Open();
+                        asicManifestBuilder.AddFile(entry.FullName, MimeType.GetMimeTypeFromFileName(Path.GetFileName(entry.FullName)), contentStream);
                     }
+                }
 
-                    foreach (var entry in archive.Entries)
-                    {
-                        if (!entry.FullName.StartsWith("META-INF/", StringComparison.Ordinal) && !string.Equals(entry.FullName, ContainerMimeTypePath, StringComparison.Ordinal))
-                        {
-                            using (Stream contentStream = entry.Open())
-                            {
-                                asicManifestBuilder.AddFile(entry.FullName, MimeType.GetMimeTypeFromFileName(Path.GetFileName(entry.FullName)), contentStream);
-                            }
-                        }
-                    }
+                byte[] manifestData = asicManifestBuilder.ToByteArray();
+                X509CertificateParser x509CertificateParser = new X509CertificateParser();
+                X509Certificate signingCertificate = x509CertificateParser.ReadCertificate(externalSigner.GetCertificate());
 
-                    byte[] manifestData = asicManifestBuilder.ToByteArray();
-                    X509CertificateParser x509CertificateParser = new X509CertificateParser();
-                    X509Certificate signingCertificate = x509CertificateParser.ReadCertificate(externalSigner.GetCertificate());
+                Pkcs7DetachedSignatureGenerator p7Generator = new Pkcs7DetachedSignatureGenerator(externalSigner);
+                byte[] signature = p7Generator.GenerateP7s(manifestData, signingCertificate, this.BuildCertificatePath(signingCertificate));
 
-                    Pkcs7DetachedSignatureGenerator p7Generator = new Pkcs7DetachedSignatureGenerator(externalSigner);
-                    byte[] signature = p7Generator.GenerateP7s(manifestData, signingCertificate, this.BuildCertificatePath(signingCertificate));
+                this.AddFileToArchive(archive, manifestPath, manifestData);
+                this.AddFileToArchive(archive, signaturePath, signature);
 
-                    this.AddFileToArchive(archive, manifestPath, manifestData);
-                    this.AddFileToArchive(archive, signaturePath, signature);
-
-                    foreach ((FileInfo file, _) in this.inputFiles)
-                    {
-                        this.AddFileToArchive(archive, file.Name, file);
-                    }
+                foreach ((FileInfo file, _) in this.inputFiles)
+                {
+                    this.AddFileToArchive(archive, file.Name, file);
                 }
             }
             catch

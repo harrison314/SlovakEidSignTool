@@ -39,10 +39,8 @@ namespace SlovakEidSignTool.Cades
 
             foreach ((FileInfo file, string mimeType) in this.inputFiles)
             {
-                using (Stream contentStream = file.OpenRead())
-                {
-                    asicManifestBuilder.AddFile(file.Name, mimeType, contentStream);
-                }
+                using Stream contentStream = file.OpenRead();
+                asicManifestBuilder.AddFile(file.Name, mimeType, contentStream);
             }
 
             byte[] manifestData = asicManifestBuilder.ToByteArray();
@@ -54,16 +52,14 @@ namespace SlovakEidSignTool.Cades
 
             byte[] signature = p7Generator.GenerateP7s(manifestData, signingCertificate, this.BuildCertificatePath(signingCertificate));
 
-            using (ZipArchive archive = ZipFile.Open(ouputFilePath, ZipArchiveMode.Create))
-            {
-                this.AddFileToArchive(archive, ContainerMimeTypePath, ContainerMimeType);
-                this.AddFileToArchive(archive, ManifestPath, manifestData);
-                this.AddFileToArchive(archive, SignaturePath, signature);
+            using ZipArchive archive = ZipFile.Open(ouputFilePath, ZipArchiveMode.Create);
+            this.AddFileToArchive(archive, ContainerMimeTypePath, ContainerMimeType);
+            this.AddFileToArchive(archive, ManifestPath, manifestData);
+            this.AddFileToArchive(archive, SignaturePath, signature);
 
-                foreach ((FileInfo file, _) in this.inputFiles)
-                {
-                    this.AddFileToArchive(archive, file.Name, file);
-                }
+            foreach ((FileInfo file, _) in this.inputFiles)
+            {
+                this.AddFileToArchive(archive, file.Name, file);
             }
         }
     }

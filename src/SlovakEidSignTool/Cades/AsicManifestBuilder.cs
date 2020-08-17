@@ -92,29 +92,23 @@ namespace SlovakEidSignTool.Cades
 
         private string GetSha256Encoded(Stream content)
         {
-            using (System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create())
-            {
-                byte[] hash = sha256.ComputeHash(content);
-                return Convert.ToBase64String(hash);
-            }
+            using System.Security.Cryptography.SHA256 sha256 = System.Security.Cryptography.SHA256.Create();
+            byte[] hash = sha256.ComputeHash(content);
+            return Convert.ToBase64String(hash);
         }
 
         public byte[] ToByteArray()
         {
-            using (MemoryStream ms = new MemoryStream())
+            using MemoryStream ms = new MemoryStream();
+            using (TextWriter textWriter = new StreamWriter(ms, Encoding.UTF8, 2048, true))
             {
-                using (TextWriter textWriter = new StreamWriter(ms, Encoding.UTF8, 2048, true))
-                {
-                    using (XmlWriter xmlWriter = XmlWriter.Create(textWriter))
-                    {
-                        this.document.Save(xmlWriter);
-                        xmlWriter.Flush();
-                        textWriter.Flush();
-                    }
-                }
-
-                return ms.ToArray();
+                using XmlWriter xmlWriter = XmlWriter.Create(textWriter);
+                this.document.Save(xmlWriter);
+                xmlWriter.Flush();
+                textWriter.Flush();
             }
+
+            return ms.ToArray();
         }
 
         public override string ToString()

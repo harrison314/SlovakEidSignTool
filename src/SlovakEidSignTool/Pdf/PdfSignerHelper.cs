@@ -19,18 +19,14 @@ namespace SlovakEidSignTool.Pdf
             if (sourcePdfPath == null) throw new ArgumentNullException(nameof(sourcePdfPath));
             if (destinationPdfPath == null) throw new ArgumentNullException(nameof(destinationPdfPath));
 
-            using (PdfReader reader = new PdfReader(sourcePdfPath))
-            {
-                Org.BouncyCastle.X509.X509Certificate bCert = Org.BouncyCastle.Security.DotNetUtilities.FromX509Certificate(rawCertificate);
-                Org.BouncyCastle.X509.X509Certificate[] chain = new Org.BouncyCastle.X509.X509Certificate[] { bCert };
+            using PdfReader reader = new PdfReader(sourcePdfPath);
+            Org.BouncyCastle.X509.X509Certificate bCert = Org.BouncyCastle.Security.DotNetUtilities.FromX509Certificate(rawCertificate);
+            Org.BouncyCastle.X509.X509Certificate[] chain = new Org.BouncyCastle.X509.X509Certificate[] { bCert };
 
-                using (FileStream stream = new FileStream(destinationPdfPath, FileMode.OpenOrCreate))
-                {
-                    PdfSigner signer = new PdfSigner(reader, stream, false);
-                    signer.SetSignatureEvent(new SignatureEvent());
-                    signer.SignDetached(externalSignature, chain, null, null, null, 0, PdfSigner.CryptoStandard.CADES);
-                }
-            }
+            using FileStream stream = new FileStream(destinationPdfPath, FileMode.OpenOrCreate);
+            PdfSigner signer = new PdfSigner(reader, stream, false);
+            signer.SetSignatureEvent(new SignatureEvent());
+            signer.SignDetached(externalSignature, chain, null, null, null, 0, PdfSigner.CryptoStandard.CADES);
         }
 
     }

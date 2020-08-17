@@ -11,17 +11,15 @@ namespace SlovakEidSignTool.Cades
     {
         public static IEnumerable<X509Certificate2> BuldChain(X509Certificate2 signedCertificate)
         {
-            using (X509Chain chain = new X509Chain())
+            using X509Chain chain = new X509Chain();
+            if (!chain.Build(signedCertificate))
             {
-                if (!chain.Build(signedCertificate))
-                {
-                    //throw new InvalidOperationException($"Certificate with {signedCertificate.Thumbprint} thumbprint is not valid.");
-                }
+                //throw new InvalidOperationException($"Certificate with {signedCertificate.Thumbprint} thumbprint is not valid.");
+            }
 
-                foreach (X509ChainElement cert in chain.ChainElements)
-                {
-                    yield return cert.Certificate;
-                }
+            foreach (X509ChainElement cert in chain.ChainElements)
+            {
+                yield return cert.Certificate;
             }
         }
 
