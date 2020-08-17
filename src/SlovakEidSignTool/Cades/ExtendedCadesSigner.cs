@@ -57,7 +57,7 @@ namespace SlovakEidSignTool.Cades
                     asicManifestBuilder.AddFile(file.Name, mimeType, contentStream);
                 }
 
-                foreach (var entry in archive.Entries)
+                foreach (ZipArchiveEntry entry in archive.Entries)
                 {
                     if (!entry.FullName.StartsWith("META-INF/", StringComparison.Ordinal) && !string.Equals(entry.FullName, ContainerMimeTypePath, StringComparison.Ordinal))
                     {
