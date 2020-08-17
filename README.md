@@ -5,7 +5,7 @@ or signing file (.txt, .pdf, .png,...) to _eIDAS CAdES-BASELINE-B ASiC-E_ contai
 
 This project aim to education [PKCS#11 standard](https://www.cryptsoft.com/pkcs11doc/STANDARD/pkcs-11v2-20.pdf) and document signing using _Slovak eID_.
 
-_SlovakEidSignTool_ is example project for signing PDFs using Slovak eID (eID with _ZEP / KEP_), designed for learning.
+_SlovakEidSignTool_ is example project for signing PDFs using Slovak eID (eID with _EP / KEP_), designed for learning.
 
 Used:
 * .Net Core 3.1 - multi-platform,
@@ -15,7 +15,7 @@ Used:
 
 ## Prerequisites
  * .Net Core SDK for build,
- * Slovak eID card with ZEP certificate,
+ * Slovak eID card with KEP certificate,
  * Driver for smart card reader (from [Slovensko.sk](https://www.slovensko.sk/sk/na-stiahnutie)),
  * Application _eID klient_ (from [Slovensko.sk](https://www.slovensko.sk/sk/na-stiahnutie)).
 
@@ -35,25 +35,25 @@ Used:
  1. Insert eID card to card reader.
  1. Run `dotnet SlovakEidSignTool.dll signPDF Example.pdf -o SignedPdf.pdf`.
  1. Type BOK.
- 1. Type ZEP PIN.
+ 1. Type KEP PIN.
 
  ### Signing the file into the CAdES ASiC-E container
  1. Insert eID card to card reader.
  1. Run `dotnet SlovakEidSignTool.dll signCades example.txt -o SignedExample.asice` (signing file, output signature file).
  1. Type BOK.
- 1. Type ZEP PIN.
+ 1. Type KEP PIN.
 
  ### Add signature to existing CAdES ASiC-E container
  1. Insert eID card to card reader.
  1. Run `dotnet SlovakEidSignTool.dll addSignCades SignedExample.asice -o SignedExample_2s.asice`
  1. Type BOK.
- 1. Type ZEP PIN.
+ 1. Type KEP PIN.
 
   ### Add file and signature to existing CAdES ASiC-E container
  1. Insert eID card to card reader.
  1. Run `dotnet SlovakEidSignTool.dll addSignCades SignedExample.asice additional.txt -o SignedExample_2s.asice`
  1. Type BOK.
- 1. Type ZEP PIN.
+ 1. Type KEP PIN.
 
 Example on _Windows 10_ x64 with self-contained build:
 
