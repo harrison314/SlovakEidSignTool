@@ -27,7 +27,7 @@ namespace SlovakEidSignTool.Pdf
                 using (FileStream stream = new FileStream(destinationPdfPath, FileMode.OpenOrCreate))
                 {
                     PdfSigner signer = new PdfSigner(reader, stream, false);
-                    signer.SignDetached(externalSignature, chain, null, null, null, 0, PdfSigner.CryptoStandard.CMS);
+                    signer.SignDetached(externalSignature, chain, null, null, null, 0, PdfSigner.CryptoStandard.CADES);
                 }
             }
         }
