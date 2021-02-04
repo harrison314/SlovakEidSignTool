@@ -120,7 +120,7 @@ namespace SlovakEidSignTool.Cades
 
             // Add SigningCertificateV2
             byte[] certHash = this.ComputeHash(signingCertificate.GetEncoded());
-            EssCertIDv2 essCert1 = new EssCertIDv2(new AlgorithmIdentifier(Oid.SHA256), certHash);
+            EssCertIDv2 essCert1 = new EssCertIDv2(new AlgorithmIdentifier(new DerObjectIdentifier(Oid.SHA256)), certHash);
             SigningCertificateV2 scv2 = new SigningCertificateV2(new EssCertIDv2[] { essCert1 });
 
             signedAttributesVector.Add(
