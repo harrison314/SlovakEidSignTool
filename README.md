@@ -1,11 +1,11 @@
 # Slovak eID Sign Tool
 _Slovak eID Sign Tool_ is tool for listing certificates from Slovak eID card,
-signing PDF documents with CAdES signature
+signing PDF documents with PAdES signature
 or signing file (.txt, .pdf, .png,...) to _eIDAS CAdES-BASELINE-B ASiC-E_ container (.asice file).
 
 This project aim to education [PKCS#11 standard](https://www.cryptsoft.com/pkcs11doc/STANDARD/pkcs-11v2-20.pdf) and document signing using _Slovak eID_.
 
-_SlovakEidSignTool_ is example project for signing PDFs using Slovak eID (eID with _EP / KEP_), designed for learning.
+_SlovakEidSignTool_ is example project for signing documents using Slovak eID (eID with _EP / KEP_), designed for education.
 
 Used:
 * .Net Core 3.1 - multi-platform,
