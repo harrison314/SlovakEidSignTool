@@ -116,6 +116,9 @@ namespace SlovakEidSignTool
                 $@"C:\Program Files (x86)\eID klient\pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
                 $@"C:\Program Files\eID klient\pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
 
+                $@"C:\Program Files (x86)\eID_klient\pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
+                $@"C:\Program Files\eID_klient\pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
+
                 $@"C:/Program Files/EAC MW klient/pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
                 $@"C:/Program Files (x86)/EAC MW klient/pkcs11_{(IntPtr.Size == 4 ? "x86" : "x64")}.dll",
 
