@@ -32,7 +32,7 @@ namespace SlovakEidSignTool
             try
             {
                 List<ISlot> slots = this.pkcs11.GetSlotList(SlotsType.WithTokenPresent);
-                this.slot = slots.SingleOrDefault(t => string.IsNullOrEmpty(zepLabel) || string.Equals(t.GetTokenInfo().Label, zepLabel, StringComparison.Ordinal));
+                this.slot = slots.SingleOrDefault(t => string.IsNullOrEmpty(zepLabel) || string.Equals(t.GetTokenInfo().Label, zepLabel, StringComparison.OrdinalIgnoreCase));
                 if (this.slot == null)
                 {
                     this.pkcs11.Dispose();
