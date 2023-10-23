@@ -32,7 +32,7 @@ namespace SlovakEidSignTool
             try
             {
                 List<ISlot> slots = this.pkcs11.GetSlotList(SlotsType.WithTokenPresent);
-                this.slot = slots.SingleOrDefault(t => string.IsNullOrEmpty(zepLabel) || string.Equals(t.GetTokenInfo().Label, zepLabel, StringComparison.Ordinal));
+                this.slot = slots.SingleOrDefault(t => string.IsNullOrEmpty(zepLabel) || string.Equals(t.GetTokenInfo().Label, zepLabel, StringComparison.OrdinalIgnoreCase));
                 if (this.slot == null)
                 {
                     this.pkcs11.Dispose();
@@ -84,7 +84,7 @@ namespace SlovakEidSignTool
                 X509Certificate2 certificate = new X509Certificate2(ckaValue);
                 if (this.IsCertificateForSigning(certificate))
                 {
-                    IObjectHandle privateKeyhandle = this.FindPrivateKey(session, ckaId, ckaLabel);
+                    IObjectHandle privateKeyhandle = this.FindPrivateKey(session, ckaId);
                     if (privateKeyhandle == null)
                     {
                         continue;
@@ -121,14 +121,13 @@ namespace SlovakEidSignTool
             return false;
         }
 
-        private IObjectHandle FindPrivateKey(ISession session, byte[] ckaId, string ckaLabel)
+        private IObjectHandle FindPrivateKey(ISession session, byte[] ckaId)
         {
             List<IObjectAttribute> searchTemplate = new List<IObjectAttribute>()
             {
                 session.Factories.ObjectAttributeFactory.Create(CKA.CKA_CLASS, CKO.CKO_PRIVATE_KEY),
                 session.Factories.ObjectAttributeFactory.Create(CKA.CKA_TOKEN, true),
                 session.Factories.ObjectAttributeFactory.Create(CKA.CKA_ID, ckaId),
-                session.Factories.ObjectAttributeFactory.Create(CKA.CKA_LABEL, ckaLabel)
             };
 
             return session.FindAllObjects(searchTemplate).FirstOrDefault();
